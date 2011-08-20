@@ -17,7 +17,7 @@ $types{v} = 'vacation';
 $types{h} = 'hours';
 $types{o} = 'other';
 
-my $queuename = 'Coding'; # FIXME Schedule
+my $queuename = 'Schedule';
 
 run();
 
@@ -165,7 +165,6 @@ sub do_main {
     for my $id (@ids) {
 	my $subj = get_subject($rt, $id);
 	print quickform('ticket_$id','Edit request #' . $id . ": " . $subj, 'edit', $id)->render;
-	last; # FIXME: REMOVEME: NO LIMIT: once queue fixed
     }
     my $o_ticket_form = CGI::FormBuilder->new(fields => ['tid'], method   => 'post', submit => 'Edit ticket', name => 'arbitrary_ticket', keepextras => ['mode'], labels => {'tid' => 'Other ticket'});
     $o_ticket_form->cgi_param('mode', 'edit');
