@@ -17,6 +17,12 @@ $types{v} = 'vacation';
 $types{h} = 'hours';
 $types{o} = 'other';
 
+my %button_names;
+$button_names{meeting} = 'Request a meeting';
+$button_names{vacation} = 'Request a vacation';
+$button_names{hours} = 'Request schedule history corrections to stop hours logging reminders';
+$button_names{schedule} = 'Request other schedule changes';
+
 my $queuename = 'Schedule';
 
 run();
@@ -167,14 +173,15 @@ sub do_main {
 	); 
     for my $id (@ids) {
 	my $subj = get_subject($rt, $id);
-	print quickform('ticket_$id','Edit request #' . $id . ": " . $subj, 'edit', $id)->render;
+	print quickform('ticket_$id','Add to or change request #' . $id . ": " . $subj, 'edit', $id)->render;
     }
     my $o_ticket_form = CGI::FormBuilder->new(fields => ['tid'], method   => 'post', submit => 'Edit ticket', name => 'arbitrary_ticket', keepextras => ['mode'], labels => {'tid' => 'Other ticket'});
     $o_ticket_form->cgi_param('mode', 'edit');
     print $o_ticket_form->render;
     print "<hr />";
-    foreach(qw(schedule vacation meeting hours)) {
-	print quickform('new_$_','New ' . $_ . " Request", 'new_' . $_)->render;
+	
+    foreach(qw(meeting vacation hours schedule)) {
+	print quickform('new_$_',$button_names{$_}, 'new_' . $_)->render;
     }
     } else {
 	my $fname = $mode;
