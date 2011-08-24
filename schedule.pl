@@ -27,8 +27,11 @@ sub get_email_for_user {
 }
 
 sub run {
-my $rt = RT::Client::REST->new(
-    server => 'http://todo.freegeek.org/rt',
+    my $hostname = `hostname`;
+    chomp $hostname;
+    my $domain =  ($hostname eq 'art') ? 'localhost' : 'todo.freegeek.org';
+    my $rt = RT::Client::REST->new(
+    server => 'http://' . $domain . '/rt',
     timeout => 30,
     );
 
@@ -204,6 +207,7 @@ sub do_main {
 	$form->field(name => 'notes', type => 'textarea');
 	unless($type eq 'other') {
 	    $form->field(name => 'date', label => 'Requested Date', type => 'text', required => 1, validate => $dateformat);
+	    $form->field(name => 'date_chooser', type => 'button');
 	}
 	if($type eq "schedule") {
 	    $form->field(name => 'date', label => 'Requested Start Date');
@@ -218,6 +222,10 @@ sub do_main {
 	    $form->field(name => 'end_date', label => 'End Date', required => 1, type => 'text', validate => $dateformat);
 	} else {
 	    $form->field(name => 'name', label => 'Request Name');
+	}
+
+	if($type eq 'schedule' || $type eq 'vacation') {
+	    $form->field(name => 'end_date_chooser', type => 'button');
 	}
 
         # happens before form render or back button, THAT WAY THAT DOESN'T SHOW UP
@@ -267,6 +275,37 @@ sub do_main {
 	    }
 	}
 	print $form->render;
+	print '<script type="text/javascript">
+var CalScript=document.createElement("script");
+CalScript.src="/cgi-bin/static/calendar.js";
+document.body.appendChild(CalScript);
+var newSS=document.createElement("link");
+newSS.rel="stylesheet";
+newSS.href="/cgi-bin/static/calendar.css";
+document.body.appendChild(newSS);
+</script>';
+
+print '<script type="text/javascript">
+    Calendar.setup({
+        inputField     :    "date",
+        ifFormat       :    "%Y/%m/%d",
+        showsTime      :    false,
+        button         :    "date_chooser",
+    });
+</script>
+';
+	if($type eq 'schedule' || $type eq 'vacation') {
+	    print '
+<script type="text/javascript">
+    Calendar.setup({
+        inputField     :    "end_date",
+        ifFormat       :    "%Y/%m/%d",
+        showsTime      :    false,
+        button         :    "end_date_chooser",
+    });
+</script>
+';
+	}
 	print "<hr />";
 	print quickform('back', 'Back to Main Page', 'index')->render;
     }
