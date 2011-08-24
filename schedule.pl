@@ -212,7 +212,8 @@ sub do_main {
 	    $form->field(name => 'name', label => 'Meeting Name');
 	    $form->field(name => 'notes', label => 'Specify list of attendees and any other details', required => $new_only);
 	} elsif($type eq "hours") {
-	    $form->field(name => 'notes', label => 'Specify breakdown of hours worked', required => $new_only);
+	    # do nothing
+	    $form->field(name => 'date', label => 'Date');
 	} elsif($type eq "vacation") {
 	    $form->field(name => 'end_date', label => 'End Date', required => 1, type => 'text', validate => $dateformat);
 	} else {
