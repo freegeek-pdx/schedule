@@ -77,10 +77,10 @@ if($session->param('IS_LOGGED_IN')) {
     };
 	if(!$success) {
 	    $logout_form->text($error);
+	    print $logout_form->render;
 	}
-	print $logout_form->render;
 	if($success) {
-	    do_main($rt, $user, $mode, $tid);
+	    do_main($rt, $user, $mode, $tid, $logout_form);
 	}
     }
 } elsif ($masterform->submitted && $masterform->validate) {
@@ -104,7 +104,7 @@ if($session->param('IS_LOGGED_IN')) {
 	    print $masterform->confirm;
 	    $logout_form->header(0); # headers always here otherwise
 	print $logout_form->render;
-	do_main($rt, $user, $mode, $tid);
+	do_main($rt, $user, $mode, $tid, $logout_form);
     } else {
 	$masterform->text($error);
 	$masterform->field(name => 'password',value => '',		   force => 1);
@@ -163,9 +163,9 @@ sub dchar_type {
 }
 
 sub do_main {
-    my ($rt, $user, $mode, $tid) = @_;
-    print "<hr />";
+    my ($rt, $user, $mode, $tid, $oform) = @_;
     if($mode eq "index") {
+	print $oform->render . "<hr />";
 	my $query = "Creator = '$user' AND Queue = '$queuename' AND (Status = 'open' OR Status = 'new' OR Status = 'stalled')";
     my @ids = $rt->search(
 	type => 'ticket',
@@ -206,6 +206,8 @@ sub do_main {
 	} else {
 	    $char = dchar_type($type);
 	}
+	$oform->title($oform->title . ": " . ($mode eq "edit" ? "edit" : "new") . " " . $type . " request");
+	print $oform->render . "<hr />";
 	my $form = quickform($fname, 'Submit Changes', $mode, $tid);
 	
 	my $dateformat = '/^[0-9]{4}\/?(0?[1-9]|1[0-2])\/?(0?[1-9]|[1-2][0-9]|3[0-1])$/';
