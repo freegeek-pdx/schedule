@@ -53,7 +53,7 @@ $masterform->sessionid($session->id);
 $session->expire('+12h');
 
 my @lfields = ();
-my $logout_form = CGI::FormBuilder->new(fields => \@lfields, header => 1, method   => 'post', submit => 'Logout', name => 'logout', required => 'ALL');
+my $logout_form = CGI::FormBuilder->new(fields => \@lfields, header => 1, method   => 'post', submit => 'Logout', name => 'logout', required => 'ALL', title => $queuename . ' Requests');
 $logout_form->sessionid($session->id);
 
 my $mode = $masterform->cgi_param('mode') || "index";
