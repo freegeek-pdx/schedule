@@ -248,7 +248,9 @@ sub do_main {
 		$enddate = $form->field('end_date');
 	    }
 	    if($type eq 'vacation' or ($type eq "schedule" && $enddate ne "")) {
+		if($type eq 'schedule') {
 		$char = "b";
+	    }
 		$subject = $char . ". " . $date . "-" . $enddate . ", " . $name; # {CHAR}. {START_DATE} to {END_DATE}, {NAME}
 	    } elsif($type eq "other") {
 		$subject = $name;
