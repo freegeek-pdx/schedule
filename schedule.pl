@@ -42,7 +42,7 @@ sub run {
     );
 
 my @fields = ('username', 'password');
-my $masterform = CGI::FormBuilder->new(fields => \@fields, header => 1, method   => 'post', keepextras => ['mode'], required => 'ALL', name => 'login');
+my $masterform = CGI::FormBuilder->new(fields => \@fields, header => 1, method   => 'post', keepextras => ['mode'], required => 'ALL', name => 'login', title => $queuename . ' RT request (login same as todo.freegeek.org)');
 
 $masterform->field(name => 'password', type => 'password');
 my $session = CGI::Session->new('driver:File',
