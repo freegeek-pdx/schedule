@@ -226,7 +226,7 @@ sub do_main {
 	    # do nothing
 	    $form->field(name => 'date', label => 'Date');
 	} elsif($type eq "vacation") {
-	    $form->field(name => 'end_date', label => 'End Date', required => 1, type => 'text', validate => $dateformat);
+	    $form->field(name => 'end_date', label => 'End Date (leave empty if only one day)', type => 'text', validate => $dateformat);
 	} else {
 	    $form->field(name => 'name', label => 'Request Name');
 	}
@@ -247,7 +247,7 @@ sub do_main {
 	    if($type eq 'vacation' or $type eq 'schedule') {
 		$enddate = $form->field('end_date');
 	    }
-	    if($type eq 'vacation' or ($type eq "schedule" && $enddate ne "")) {
+	    if(($type eq 'vacation' or $type eq "schedule") && ($enddate ne "")) {
 		if($type eq 'schedule') {
 		$char = "b";
 	    }
@@ -263,22 +263,18 @@ sub do_main {
 	    return do_main($rt, $user, "index");
 	} else {
 	    unless($form->submitted) {
-		if($char eq "b" or $char eq "v") {
-		    my @parts = @{[$subject =~ /^(.)\. (.+)-(.+), (.+)/]};
-		    my $date = $parts[1];
-		    $form->field(name => 'date', value => $date);
-		    my $end_date = $parts[2];
-		    $form->field(name => 'end_date', value => $end_date);
-		    my $name = $parts[3];
-		    $form->field(name => 'name', value => $name);
-		} elsif($char eq "o" ) {
+		if($char eq "o") {
 		    my $name = $subject;
 		    $form->field(name => 'name', value => $name);
 		} else {
-		    my @parts = @{[$subject =~ /^(.)\. (.+), (.+)/]};
+		    my @parts = @{[$subject =~ /^(.)\.\s+([^-]+)(?:-(.+))?,\s+(.+)/]};
 		    my $date = $parts[1];
 		    $form->field(name => 'date', value => $date);
-		    my $name = $parts[2];
+		    if($char eq "v" or $char eq "b") {
+			my $end_date = $parts[2];
+			$form->field(name => 'end_date', value => $end_date);
+		    }
+		    my $name = $parts[3];
 		    $form->field(name => 'name', value => $name);
 		}
 	    }
