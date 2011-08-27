@@ -214,7 +214,7 @@ sub do_main {
 	$form->field(name => 'notes', type => 'textarea');
 	unless($type eq 'other') {
 	    $form->field(name => 'date', label => 'Requested Date', type => 'text', required => 1, validate => $dateformat);
-	    $form->field(name => 'date_chooser', type => 'button');
+	    $form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
 	}
 	if($type eq "schedule") {
 	    $form->field(name => 'date', label => 'Requested Start Date');
@@ -232,7 +232,7 @@ sub do_main {
 	}
 
 	if($type eq 'schedule' || $type eq 'vacation') {
-	    $form->field(name => 'end_date_chooser', type => 'button');
+	    $form->field(name => 'end_date_chooser', type => 'button', label => '', value => 'End Date Chooser');
 	}
 
         # happens before form render or back button, THAT WAY THAT DOESN'T SHOW UP
