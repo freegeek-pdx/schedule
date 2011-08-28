@@ -259,21 +259,31 @@ sub do_main {
 		$char = dchar_type($type);
 		$subject = $char . ". " . $date . ", " . $name; # {CHAR}. {START_DATE}, {NAME}
 	    }
-	    my $newticket = save_changes($rt, $user, $tid, $subject, $text);
-	    # FIXME: error handle
+	    my $newticket = 0;
+	    my $ferror;
+	    try {
+		$newticket = save_changes($rt, $user, $tid, $subject, $text);
+    } catch Exception::Class::Base with {
+	$ferror = shift->message;
+    };
+	    if($newticket == 0) {
+		print "<span style='color: red'><b>There was an error while trying to save: " . $ferror . "</b></span>";
+		} else {
 	    print '<table border="1">';
 	    print "<tr><th colspan=2>Your submission has been received and saved in ticket #" . $newticket . "</td></tr>";
-	    foreach(qw(name date end_date notes)) {
-		my $val = $form->field($_);
+	    for my $field ($form->fields) {
+		my $val = $field->value;
 		if($val) {
+		    my $n = $field->label;
 		    print "<tr><td>";
-		    print $_;
+		    print $n;
 		    print "</td><td><pre>";
 		    print $val;
 		    print "</pre></td></tr>"
 		}
 	    }
 	    print "</table>";
+	    }
 	    print "<hr />";
 	    print quickform('back', 'Back to Main Page', 'index')->render;
 	    return;
