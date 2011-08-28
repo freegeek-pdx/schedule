@@ -80,6 +80,7 @@ if($session->param('IS_LOGGED_IN')) {
 	    print $logout_form->render;
 	}
 	if($success) {
+	    $logout_form->text("Logged in as " . $user);
 	    do_main($rt, $user, $mode, $tid, $logout_form);
 	}
     }
@@ -101,9 +102,7 @@ if($session->param('IS_LOGGED_IN')) {
 	    $session->param('username', $user);
 	    $session->param('password', $pass);
 	    $masterform->field(name => 'password',value => '(not shown)',		   force => 1);
-	    print $masterform->confirm;
-	    $logout_form->header(0); # headers always here otherwise
-	print $logout_form->render;
+	    $logout_form->text("Logged in as " . $user);
 	do_main($rt, $user, $mode, $tid, $logout_form);
     } else {
 	$masterform->text($error);
@@ -261,8 +260,23 @@ sub do_main {
 		$subject = $char . ". " . $date . ", " . $name; # {CHAR}. {START_DATE}, {NAME}
 	    }
 	    my $newticket = save_changes($rt, $user, $tid, $subject, $text);
-	    print $form->confirm;
-	    return do_main($rt, $user, "index");
+	    # FIXME: error handle
+	    print '<table border="1">';
+	    print "<tr><th colspan=2>Your submission has been received and saved in ticket #" . $newticket . "</td></tr>";
+	    foreach(qw(name date end_date notes)) {
+		my $val = $form->field($_);
+		if($val) {
+		    print "<tr><td>";
+		    print $_;
+		    print "</td><td><pre>";
+		    print $val;
+		    print "</pre></td></tr>"
+		}
+	    }
+	    print "</table>";
+	    print "<hr />";
+	    print quickform('back', 'Back to Main Page', 'index')->render;
+	    return;
 	} else {
 	    unless($form->submitted) {
 		if($char eq "o") {
