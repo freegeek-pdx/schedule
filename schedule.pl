@@ -213,7 +213,7 @@ sub do_main {
 	my $dateformat = '/^[0-9]{4}\/?(0?[1-9]|1[0-2])\/?(0?[1-9]|[1-2][0-9]|3[0-1])$/';
 
 	$form->field(name => 'name', label => 'Worker Name', type => 'text', required => 1);
-	$form->field(name => 'notes', type => 'textarea');
+	$form->field(name => 'notes', type => 'textarea',    cols => '80', rows => '10');
 	unless($type eq 'other') {
 	    $form->field(name => 'date', label => 'Requested Date', type => 'text', required => 1, validate => $dateformat);
 	    $form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
