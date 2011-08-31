@@ -4,7 +4,7 @@ package main;
 
 use File::Basename;
 
-use lib dirname($0) . "/lib";
+use lib dirname($0) . "/../lib";
 
 use Requestor::Schedule;
 
