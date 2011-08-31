@@ -62,11 +62,11 @@ sub setup {
     my $dateformat = '/^[0-9]{4}\/?(0?[1-9]|1[0-2])\/?(0?[1-9]|[1-2][0-9]|3[0-1])$/';
 
     $form->field(name => 'name', label => 'Supply Name', type => 'text', required => 1);
-#    $form->field(name => 'quantity', label => 'Quantity', type => 'text', required => 0);
+    $form->field(name => 'quantity', label => 'Quantity', type => 'text', required => 0);
     $form->field(name => 'notes', type => 'textarea',  cols => '80', rows => '10');
 
-#    $form->field(name => 'date', label => 'Requested Date', type => 'text', required => 0, validate => $dateformat);
-#    $form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
+    $form->field(name => 'date', label => 'Needed By Date', type => 'text', required => 0, validate => $dateformat);
+    $form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
 }
 
 sub preparse {
@@ -87,14 +87,11 @@ sub parse {
     my $subject = $self->{subject};
 
     unless($form->submitted) {
-#    my @parts = @{[$subject =~ /^(.)\.\s+([^-]+)(?:-(.+))?,\s+(.+)/]};
-#    my $date = $parts[1];
-	$form->field(name => 'name', value => $subject);	
+	my @parts = @{[$subject =~ /^(?:([^:]+)[:]\s+)?([^(]+)(?:\s+\((.+)\))?$/]};
+	$form->field(name => 'name', value => $parts[1]);
+	$form->field(name => 'date', value => $parts[0]);
+	$form->field(name => 'quantity', value => $parts[2]);
     }
-}
-
-sub has_date { # FIXME: remove once the date is uncommented above
-    return 0;
 }
 
 sub save {
@@ -102,8 +99,10 @@ sub save {
     my $form = $self->{form};
     my $text = $form->field('notes');
     my $name = $form->field('name');
+    my $date = $form->field('date');
+    my $quantity = $form->field('quantity');
     my $subject = "";
-    $subject = $name;
+    $subject = ($date eq '' ? '' : $date . ': ') . $name . ($quantity eq '' ? '' : ' (' . $quantity . ')');
     $self->{subject} = $subject;
     $self->do_save($subject, $text);
 }
