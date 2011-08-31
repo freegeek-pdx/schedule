@@ -233,7 +233,7 @@ sub do_main {
 }
 
 sub hide_other_ticket_f {
-    return 1;
+    return 0;
 }
 
 sub index {

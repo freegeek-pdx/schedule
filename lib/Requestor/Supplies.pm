@@ -7,6 +7,10 @@ use Requestor::Base;
 
 use base 'Requestor::Base';
 
+sub hide_other_ticket_f {
+    return 1;
+}
+
 # implementor API:
 # init: set button_names, types, queuename, 
 sub init {
