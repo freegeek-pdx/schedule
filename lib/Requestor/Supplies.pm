@@ -44,8 +44,10 @@ sub has_login {
 
 sub login_information {
     my $info = {};
-    $info->{user} = "ticketcloser";
-    $info->{password} = "ticketticketticket";
+    die "Missing file in format USER:PASS in /etc/rtconf" unless(-e "/etc/rtconf");
+    my $val = `cat /etc/rtconf`;
+    chomp $val;
+    ($info->{user}, $info->{password}) = split ':', $val;
     return $info;
 }
 
