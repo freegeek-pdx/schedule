@@ -13,6 +13,10 @@ sub has_end_date {
     return 0;
 }
 
+sub has_date {
+    return 1;
+}
+
 sub has_login {
     return 1;
 }
@@ -298,6 +302,7 @@ newSS.href="/cgi-bin/static/calendar.css";
 document.body.appendChild(newSS);
 </script>';
 
+    if($self->has_date) {
     print '<script type="text/javascript">
     Calendar.setup({
         inputField     :    "date",
@@ -307,6 +312,7 @@ document.body.appendChild(newSS);
     });
 </script>
 ';
+    }
     if($self->has_end_date) {
 	print '
 <script type="text/javascript">

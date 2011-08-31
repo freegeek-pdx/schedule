@@ -49,6 +49,16 @@ sub has_end_date {
     }
 }
 
+sub has_date {
+    my $self = shift;
+    my $type = $self->{type};
+    if($type eq 'other') {
+	return 0;
+    } else {
+	return 1;
+    }
+}
+
 # save, setup, parse
 
 sub setup {
