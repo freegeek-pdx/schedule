@@ -21,10 +21,6 @@ sub has_login {
     return 1;
 }
 
-sub login_information {
-    return; # implementors return a hash
-}
-
 sub get_login_information {
     my $self = shift;
     if($self->has_login) {
@@ -33,7 +29,7 @@ sub get_login_information {
 	$info->{password} = $self->{session}->param('password');
 	return $info;
     } else {
-	return login_information;
+	return $self->login_information;
     }
 }
 
@@ -97,6 +93,9 @@ sub run {
 
     my @lfields = ();
     my $logout_form = CGI::FormBuilder->new(fields => \@lfields, header => 1, method   => 'post', submit => 'Logout', name => 'logout', required => 'ALL', title => $self->queuename . ' Requests');
+    if(!$self->has_login) {
+	$logout_form->submit(0);
+    }
     $logout_form->sessionid($session->id);
 
     my $mode = $masterform->cgi_param('mode') || "index";
@@ -132,7 +131,9 @@ sub run {
 		$self->{tid} = $tid;
 		$self->{logout_form} = $logout_form;
 		$self->{rt} = $rt;
-		$logout_form->text("Logged in as " . $user);
+		if($self->has_login) {
+		    $logout_form->text("Logged in as " . $user);
+		}
 		$self->do_main;
 	    }
 	}
@@ -154,7 +155,9 @@ sub run {
 	    $session->param('username', $user);
 	    $session->param('password', $pass);
 	    $masterform->field(name => 'password',value => '(not shown)',		   force => 1);
-	    $logout_form->text("Logged in as " . $user);
+		if($self->has_login) {
+		    $logout_form->text("Logged in as " . $user);
+		}
 	    $self->{user} = $user;
 	    $self->{mode} = $mode;
 	    $self->{tid} = $tid;
@@ -229,6 +232,10 @@ sub do_main {
     }
 }
 
+sub hide_other_ticket_f {
+    return 1;
+}
+
 sub index {
     my $self = shift;
     print $self->{logout_form}->render . "<hr />";
@@ -246,7 +253,9 @@ sub index {
     }
     my $o_ticket_form = CGI::FormBuilder->new(fields => ['tid'], method   => 'post', submit => 'Edit ticket', name => 'arbitrary_ticket', keepextras => ['mode'], labels => {'tid' => 'Other ticket'});
     $o_ticket_form->cgi_param('mode', 'edit'); # FIXME: other end needs ot verify that this is in correct queue
-    print $o_ticket_form->render;
+    unless($self->hide_other_ticket_f) {
+	print $o_ticket_form->render;
+    }
     print "<hr />";
     
     foreach($self->ordered_types) {
