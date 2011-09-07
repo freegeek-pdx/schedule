@@ -297,7 +297,7 @@ sub non_index_action {
     print $self->{logout_form}->render . "<hr />";
     my $form = $self->{form};
     
-#    $self->pre_validate(); # TODO: this can use Date::{Parse,Format} in order to allow other date formats. it should work, however the validations still use the user set value somehow. disable javascript validations in Schedule::setup, too.
+    $self->pre_validate();
 
     if($form->submitted && $form->validate) {
 	$self->save;
