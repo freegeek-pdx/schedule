@@ -15,6 +15,8 @@ use CGI::Session;
 use RT::Client::REST;
 use RT::Client::REST::User;
 use Error qw(:try);
+use Date::Parse;
+use Date::Format;
 
 use strict;
 use warnings;
@@ -332,6 +334,7 @@ sub pre_validate {
 sub render {
     my $self = shift;
     my $form = $self->{form};
+    $form->{javascript} = 0;
     print $form->render;
 
     if($self->has_date) {

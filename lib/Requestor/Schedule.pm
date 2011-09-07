@@ -7,9 +7,6 @@ use Requestor::Base;
 
 use base 'Requestor::Base';
 
-use Date::Parse;
-use Date::Format;
-
 # implementor API:
 # init: set button_names, types, queuename, 
 sub init {
@@ -67,7 +64,6 @@ sub has_date {
 sub setup {
     my $self = shift;
     my $form = $self->quickform($self->{fname}, 'Submit Changes', $self->{mode}, $self->{tid});
-     $form->{javascript} = 0;
     $self->{form} = $form;
     my $type = $self->{type};
 
