@@ -65,7 +65,7 @@ sub setup {
     $form->field(name => 'quantity', label => 'Quantity', type => 'text', required => 0);
     $form->field(name => 'notes', type => 'textarea',  cols => '80', rows => '10');
 
-    $form->field(name => 'date', label => 'Needed By Date', type => 'text', required => 0, validate => $dateformat);
+    $form->field(name => 'date', label => 'Needed By Date (YYYY/MM/DD)', type => 'text', required => 0, validate => $dateformat);
     $form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
 }
 

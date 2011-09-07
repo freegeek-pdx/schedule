@@ -31,26 +31,6 @@ sub init {
     $self->{buttons} = \%button_names;
 }
 
-sub pre_validate {
-    my $self = shift;
-    my $form = $self->{form};
-    # this does not affect the value that the validations check against, making it useless
-    if($form->submitted) {
-	if($self->has_date) {
-	    my $val = str2time($form->field('date'));
-	    if($val) {
-		$form->field(name => 'date', value => time2str("%Y/%m/%d", $val), force => 1, validate => undef);	    
-	    }
-	} 
-	if($self->has_end_date) {
-	    my $val = str2time($form->field('end_date'));
-	    if($val) {
-		$form->field(name => 'end_date', value => time2str("%Y/%m/%d", $val), force => 1, validate => undef);
-	    }
-	}
-    }
-}
-
 sub ordered_types {
     return qw(meeting vacation hours schedule);
 }
