@@ -7,6 +7,9 @@ use Requestor::Base;
 
 use base 'Requestor::Base';
 
+use Date::Parse;
+use Date::Format;
+
 # implementor API:
 # init: set button_names, types, queuename, 
 sub init {
@@ -26,6 +29,20 @@ sub init {
     $button_names{hours} = 'Request schedule history corrections to stop hours logging reminders';
     $button_names{schedule} = 'Request other schedule changes';
     $self->{buttons} = \%button_names;
+}
+
+sub pre_validate {
+    my $self = shift;
+    my $form = $self->{form};
+    # this does not affect the value that the validations check against, making it useless
+    if($form->submitted) {
+	if($self->has_date) {
+	    $form->field(name => 'date', value => time2str("%Y/%m/%d", str2time($form->field('date'))));	    
+	} 
+	if($self->has_end_date) {
+	    $form->field(name => 'end_date', value => time2str("%Y/%m/%d", str2time($form->field('end_date'))));
+	}
+    }
 }
 
 sub ordered_types {
@@ -64,6 +81,7 @@ sub has_date {
 sub setup {
     my $self = shift;
     my $form = $self->quickform($self->{fname}, 'Submit Changes', $self->{mode}, $self->{tid});
+#     $form->{javascript} = 0;
     $self->{form} = $form;
     my $type = $self->{type};
 

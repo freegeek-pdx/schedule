@@ -296,6 +296,9 @@ sub non_index_action {
     $self->{logout_form}->title($self->{logout_form}->title . ": " . ($self->{mode} eq "edit" ? "edit" : "new") . " " . $self->{type} . " request");
     print $self->{logout_form}->render . "<hr />";
     my $form = $self->{form};
+    
+#    $self->pre_validate(); # TODO: this can use Date::{Parse,Format} in order to allow other date formats. it should work, however the validations still use the user set value somehow. disable javascript validations in Schedule::setup, too.
+
     if($form->submitted && $form->validate) {
 	$self->save;
 #	$self->{mode} = "index";
@@ -305,6 +308,10 @@ sub non_index_action {
     }
     print "<hr />";
     print $self->quickform('back', 'Back to Main Page', 'index')->render;
+}
+
+sub pre_validate {
+    return;
 }
 
 sub render {
