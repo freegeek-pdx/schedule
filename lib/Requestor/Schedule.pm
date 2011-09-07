@@ -90,20 +90,20 @@ sub setup {
     $form->field(name => 'name', label => 'Worker Name', type => 'text', required => 1);
     $form->field(name => 'notes', type => 'textarea',  cols => '80', rows => '10');
     unless($type eq 'other') {
-	$form->field(name => 'date', label => 'Requested Date', type => 'text', required => 1, validate => $dateformat);
+	$form->field(name => 'date', label => 'Requested Date (YYYY/MM/DD)', type => 'text', required => 1, validate => $dateformat);
 	$form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
     }
     if($type eq "schedule") {
-	$form->field(name => 'date', label => 'Requested Start Date');
-	$form->field(name => 'end_date', label => 'End Date (leave empty for ongoing)', type => 'text', validate => $dateformat);
+	$form->field(name => 'date', label => 'Requested Start Date (YYYY/MM/DD)');
+	$form->field(name => 'end_date', label => 'End Date (YYYY/MM/DD, leave empty for ongoing)', type => 'text', validate => $dateformat);
     } elsif($type eq "meeting") {
 	$form->field(name => 'name', label => 'Meeting Name');
 	$form->field(name => 'notes', label => 'Specify list of attendees and any other details', required => $self->{new_only});
     } elsif($type eq "hours") {
 	# do nothing
-	$form->field(name => 'date', label => 'Date');
+	$form->field(name => 'date', label => 'Date (YYYY/MM/DD)');
     } elsif($type eq "vacation") {
-	$form->field(name => 'end_date', label => 'End Date (leave empty if only one day)', type => 'text', validate => $dateformat);
+	$form->field(name => 'end_date', label => 'End Date (YYYY/MM/DD, leave empty if only one day)', type => 'text', validate => $dateformat);
     } else {
 	$form->field(name => 'name', label => 'Request Name');
     }
