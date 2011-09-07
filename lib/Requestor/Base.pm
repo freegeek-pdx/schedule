@@ -187,6 +187,17 @@ sub run {
     }
 }
 
+sub quicklink {
+    my ($self, $name, $text, $mode, $tid) = @_;
+    my $href = $ENV{"SCRIPT_NAME"};
+    $href .= "?";
+    $href .= "mode=" . $mode;
+    if(defined($tid)) {
+	$href .= "&tid=" . $tid;
+    }
+    return '<a href="' . $href . '">' . $text . "</a><br />";
+}
+
 sub quickform {
     my ($self, $name, $text, $mode, $tid) = @_;
     my @list = ('mode');
@@ -245,7 +256,7 @@ sub do_main {
 }
 
 sub hide_other_ticket_f {
-    return 0;
+    return 1; # DEVEL
 }
 
 sub index {
@@ -259,9 +270,10 @@ sub index {
 	type => 'ticket',
 	query => $query
 	); 
+    print '<h4>Add to or change existing request:</h4>';
     for my $id (@ids) {
 	my $subj = $self->get_subject($id);
-	print $self->quickform('ticket_$id','Add to or change request #' . $id . ": " . $subj, 'edit', $id)->render;
+	print $self->quicklink('ticket_$id','#' . $id . ": " . $subj, 'edit', $id);
     }
     my $o_ticket_form = CGI::MyFormBuilder->new(fields => ['tid'], method   => 'post', submit => 'Edit ticket', name => 'arbitrary_ticket', keepextras => ['mode'], labels => {'tid' => 'Other ticket'});
     $o_ticket_form->cgi_param('mode', 'edit'); # FIXME: other end needs ot verify that this is in correct queue
@@ -269,7 +281,7 @@ sub index {
 	print $o_ticket_form->render;
     }
     print "<hr />";
-    
+    print '<h4>New request:</h4>';    
     foreach($self->ordered_types) {
 	print $self->quickform('new_$_',$self->button_names->{$_}, 'new_' . $_)->render;
     }
