@@ -1,7 +1,17 @@
+package CGI::MyFormBuilder;
+
+use CGI::FormBuilder;
+use base 'CGI::FormBuilder';
+
+sub script {
+    my $self = shift;
+    my $append = $self->{header} ? '<script type="text/javascript" src="/cgi-bin/static/calendar.js"></script><link rel="stylesheet" href="/cgi-bin/static/calendar.css"></link>' : '';
+    return $append . CGI::FormBuilder::script($self, @_);
+}
+
 package Requestor::Base;
 
 use CGI::Session;
-use CGI::FormBuilder;
 use RT::Client::REST;
 use RT::Client::REST::User;
 use Error qw(:try);
@@ -81,7 +91,7 @@ sub run {
 	);
 
     my @fields = ('username', 'password');
-    my $masterform = CGI::FormBuilder->new(fields => \@fields, header => 1, method   => 'post', keepextras => ['mode'], required => 'ALL', name => 'login', title => $self->queuename . ' RT request (login same as todo.freegeek.org)');
+    my $masterform = CGI::MyFormBuilder->new(fields => \@fields, header => 1, method   => 'post', keepextras => ['mode'], required => 'ALL', name => 'login', title => $self->queuename . ' RT request (login same as todo.freegeek.org)');
 
     $masterform->field(name => 'password', type => 'password');
     my $session = CGI::Session->new('driver:File',
@@ -92,7 +102,7 @@ sub run {
     $session->expire('+12h');
 
     my @lfields = ();
-    my $logout_form = CGI::FormBuilder->new(fields => \@lfields, header => 1, method   => 'post', submit => 'Logout', name => 'logout', required => 'ALL', title => $self->queuename . ' Requests');
+    my $logout_form = CGI::MyFormBuilder->new(fields => \@lfields, header => 1, method   => 'post', submit => 'Logout', name => 'logout', required => 'ALL', title => $self->queuename . ' Requests');
     if(!$self->has_login) {
 	$logout_form->submit(0);
     }
@@ -181,7 +191,7 @@ sub quickform {
     if(defined($tid)) {
 	push @list, 'tid';
     }
-    my $ticket_form = CGI::FormBuilder->new(fields => [], method   => 'post', submit => $text, name => $name, keepextras => \@list);
+    my $ticket_form = CGI::MyFormBuilder->new(fields => [], method   => 'post', submit => $text, name => $name, keepextras => \@list);
     $ticket_form->cgi_param('mode', $mode);
     if(defined($tid)) {
 	$ticket_form->cgi_param('tid', $tid);
@@ -251,7 +261,7 @@ sub index {
 	my $subj = $self->get_subject($id);
 	print $self->quickform('ticket_$id','Add to or change request #' . $id . ": " . $subj, 'edit', $id)->render;
     }
-    my $o_ticket_form = CGI::FormBuilder->new(fields => ['tid'], method   => 'post', submit => 'Edit ticket', name => 'arbitrary_ticket', keepextras => ['mode'], labels => {'tid' => 'Other ticket'});
+    my $o_ticket_form = CGI::MyFormBuilder->new(fields => ['tid'], method   => 'post', submit => 'Edit ticket', name => 'arbitrary_ticket', keepextras => ['mode'], labels => {'tid' => 'Other ticket'});
     $o_ticket_form->cgi_param('mode', 'edit'); # FIXME: other end needs ot verify that this is in correct queue
     unless($self->hide_other_ticket_f) {
 	print $o_ticket_form->render;
@@ -301,15 +311,6 @@ sub render {
     my $self = shift;
     my $form = $self->{form};
     print $form->render;
-    print '<script type="text/javascript">
-var CalScript=document.createElement("script");
-CalScript.src="/cgi-bin/static/calendar.js";
-document.body.appendChild(CalScript);
-var newSS=document.createElement("link");
-newSS.rel="stylesheet";
-newSS.href="/cgi-bin/static/calendar.css";
-document.body.appendChild(newSS);
-</script>';
 
     if($self->has_date) {
     print '<script type="text/javascript">
