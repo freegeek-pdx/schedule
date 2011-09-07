@@ -63,10 +63,11 @@ sub setup {
 
     $form->field(name => 'name', label => 'Supply Name', type => 'text', required => 1);
     $form->field(name => 'quantity', label => 'Quantity', type => 'text', required => 0);
-    $form->field(name => 'notes', type => 'textarea',  cols => '80', rows => '10');
-
+    $form->field(name => 'requestor', label => 'Requestor Name', type => 'text', required => 0);
     $form->field(name => 'date', label => 'Needed By Date (YYYY/MM/DD)', type => 'text', required => 0, validate => $dateformat);
     $form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
+    $form->field(name => 'notes', type => 'textarea',  cols => '80', rows => '10');
+
 }
 
 sub preparse {
@@ -98,6 +99,10 @@ sub save {
     my $self = shift;
     my $form = $self->{form};
     my $text = $form->field('notes');
+    my $requestor = $form->field('requestor');
+    if($requestor ne '') {
+	$text = "Requested by: " . $requestor . "\n" . $text;
+    }
     my $name = $form->field('name');
     my $date = $form->field('date');
     my $quantity = $form->field('quantity');
