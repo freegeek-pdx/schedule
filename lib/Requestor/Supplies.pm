@@ -11,6 +11,50 @@ sub hide_other_ticket_f {
     return 1;
 }
 
+sub parse_supply {
+    my $istr = shift;
+    my @list = split /\s/, $istr;
+    my $in = 0;
+    my $t;
+    my @astr;
+    my @quant;
+    my $by = "";
+    while($t = shift @list) {
+        if($t =~ /^\(/) {
+            $in = 1;
+            $t =~ s/^\(//g;
+            push @quant, $t;
+        }elsif($t =~ /\)$/ and $in == 1) {
+            $t =~ s/\)$//g;
+            push @quant, $t;
+            $in = 0;
+        }elsif($in == 0 and $t eq "by") {
+            my $d = shift @list;
+            $by = $d;
+        } else {
+            if($in) {
+                push @quant, $t;
+            } else {
+                push @astr, $t;
+            }
+        }
+    }
+    my $str = join ' ', @astr;
+    my $quantity = join ' ', @quant;
+    return ($str, $quantity, $by);
+}
+
+sub format_supply {
+    my ($str, $quant, $by) = @_;
+    if($quant ne "") {
+        $quant = " (" . $quant . ")";
+    }
+    if($by ne "") {
+        $by = " by " . $by;
+    }
+    return $str . $quant . $by;
+}
+
 # implementor API:
 # init: set button_names, types, queuename, 
 sub init {
@@ -88,10 +132,10 @@ sub parse {
     my $subject = $self->{subject};
 
     unless($form->submitted) {
-	my @parts = @{[$subject =~ /^(?:([^:]+)[:]\s+)?([^(]+)(?:\s+\((.+)\))?$/]};
-	$form->field(name => 'name', value => $parts[1]);
-	$form->field(name => 'date', value => $parts[0]);
-	$form->field(name => 'quantity', value => $parts[2]);
+	my @parts = @{[parse_supply($subject)]};
+	$form->field(name => 'name', value => $parts[0]);
+	$form->field(name => 'date', value => $parts[2]);
+	$form->field(name => 'quantity', value => $parts[1]);
     }
 }
 
@@ -107,7 +151,7 @@ sub save {
     my $date = $form->field('date');
     my $quantity = $form->field('quantity');
     my $subject = "";
-    $subject = ($date eq '' ? '' : $date . ': ') . $name . ($quantity eq '' ? '' : ' (' . $quantity . ')');
+    $subject = format_supply($name, $quantity, $date);
     $self->{subject} = $subject;
     $self->do_save($subject, $text);
 }
