@@ -271,8 +271,18 @@ sub index {
 	query => $query
 	); 
     print '<h4>Add to or change existing request:</h4>';
+    my %idhash;
+    my %dchash;
     for my $id (@ids) {
 	my $subj = $self->get_subject($id);
+	$idhash{$id} = $subj;
+	$dchash{$id} = $subj . "";
+	$dchash{$id} =~ tr/A-Z/a-z/;
+    }
+    my @sorted = sort { $dchash{$a} cmp $dchash{$b} } keys %idhash;
+    foreach(@sorted) {
+	my $id = $_;
+	my $subj = $idhash{$id};
 	print $self->quicklink('ticket_$id','#' . $id . ": " . $subj, 'edit', $id);
     }
     my $o_ticket_form = CGI::MyFormBuilder->new(fields => ['tid'], method   => 'post', submit => 'Edit ticket', name => 'arbitrary_ticket', keepextras => ['mode'], labels => {'tid' => 'Other ticket'});
