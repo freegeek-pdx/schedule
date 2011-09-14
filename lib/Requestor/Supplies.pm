@@ -21,7 +21,11 @@ sub parse_supply {
     my $by = "";
     while($t = shift @list) {
         if($t =~ /^\(/) {
-            $in = 1;
+	    if($t =~ /\)$/) {
+		$t =~ s/\)$//g;
+	    } else {
+		$in = 1;
+	    }
             $t =~ s/^\(//g;
             push @quant, $t;
         }elsif($t =~ /\)$/ and $in == 1) {
