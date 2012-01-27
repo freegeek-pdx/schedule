@@ -409,7 +409,7 @@ sub do_save {
 	$ferror = shift->message;
     };
     if(defined($ferror) && $ferror =~ /Ticket (\d+) created/) {
-	$newticket = $1;
+	$self->{tid} = $newticket = $1;
     }
     if($newticket == 0) {
 	print "<span style='color: red'><b>There was an error while trying to save: " . $ferror . "</b></span>";
