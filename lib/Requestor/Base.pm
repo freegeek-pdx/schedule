@@ -1,7 +1,21 @@
 package CGI::MyFormBuilder;
 
+use strict;
+use warnings;
+
 use CGI::FormBuilder;
 use base 'CGI::FormBuilder';
+
+use CGI::FormBuilder::Util;
+
+*script_name = \&action;
+sub action {
+    local $^W = 0;  # -w sucks (still)
+    my $self = shift;
+    $self->{action} = shift if @_;
+    return $self->{action} if exists $self->{action};
+    return $ENV{"SCRIPT_NAME"}; # that was easy?
+}
 
 sub script {
     my $self = shift;
