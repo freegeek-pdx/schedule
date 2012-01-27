@@ -408,11 +408,17 @@ sub do_save {
     } catch Exception::Class::Base with {
 	$ferror = shift->message;
     };
+    if(defined($ferror) && $ferror =~ /Ticket (\d+) created/) {
+	$newticket = $1;
+    }
     if($newticket == 0) {
 	print "<span style='color: red'><b>There was an error while trying to save: " . $ferror . "</b></span>";
     } else {
 	print '<table border="1">';
-	    print "<tr><th colspan=2>Your submission has been received and saved in ticket #" . $newticket . "</td></tr>";
+	    print "<tr><th colspan=2>Your submission has been received and saved in ticket #" . $newticket . "</th></tr>";
+	    if(defined($ferror)) {
+		print "<tr><td colspan=2>There was an error which did NOT prevent the ticket from being created, but please report this issue to a Technocrat regardless: " . $ferror . "</td></tr>";
+	    }
 	for my $field ($self->{form}->fields) {
 	    next if $field->name =~ /chooser/i;
 	    my $val = $field->value;
