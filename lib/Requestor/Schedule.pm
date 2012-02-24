@@ -75,6 +75,9 @@ sub setup {
 	$form->field(name => 'date', label => 'Requested Date (YYYY/MM/DD)', type => 'text', required => 1, validate => $dateformat);
 	$form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
     }
+    if($type eq 'meeting') {
+	$form->field(name => 'time', label => 'Meeting Time', type => 'text', required => 1);
+    }
     if($type eq "schedule") {
 	$form->field(name => 'date', label => 'Requested Start Date (YYYY/MM/DD)');
 	$form->field(name => 'end_date', label => 'End Date (YYYY/MM/DD, leave empty for ongoing)', type => 'text', validate => $dateformat);
@@ -130,14 +133,17 @@ sub parse {
 	    my $name = $subject;
 	    $form->field(name => 'name', value => $name);
 	} else {
-	    my @parts = @{[$subject =~ /^(.)\.\s+([^-]+)(?:-(.+))?,\s+(.+)/]};
+	    my @parts = @{[$subject =~ /^(.)\.\s+([^- ]+)(?:-([^ ]+))?(?:\s+at\s+([^,]+))?,\s+(.+)/]};
 	    my $date = $parts[1];
 	    $form->field(name => 'date', value => $date);
 	    if($char eq "v" or $char eq "b") {
 		my $end_date = $parts[2];
 		$form->field(name => 'end_date', value => $end_date);
+	    } elsif($char eq "m") {
+		my $time = $parts[3];
+		$form->field(name => 'time', value => $time);
 	    }
-	    my $name = $parts[3];
+	    my $name = $parts[4];
 	    $form->field(name => 'name', value => $name);
 	}
     }
@@ -165,6 +171,9 @@ sub save {
 	$subject = $char . ". " . $date . "-" . $enddate . ", " . $name; # {CHAR}. {START_DATE} to {END_DATE}, {NAME}
     } elsif($type eq "other") {
 	$subject = $name;
+    } elsif($type eq "meeting") {
+	my $time = $form->field('time');
+	$subject = $char . ". " . $date . " at " . $time . ", " . $name; # {CHAR}. {START_DATE}, {NAME}
     } else {
 	$subject = $char . ". " . $date . ", " . $name; # {CHAR}. {START_DATE}, {NAME}
     }
