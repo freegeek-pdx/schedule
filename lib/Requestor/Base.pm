@@ -194,11 +194,17 @@ sub run {
 	    $masterform->text($error);
 	    $masterform->field(name => 'password',value => '',		   force => 1);
 	    print $masterform->render;
+	    $self->link_hook();
 	}
     } else {
 	$masterform->field(name => 'password',value => '',		   force => 1);
 	print $masterform->render;
+	$self->link_hook();
     }
+}
+
+sub link_hook() {
+    return;
 }
 
 sub quicklink {
@@ -275,7 +281,9 @@ sub hide_other_ticket_f {
 
 sub index {
     my $self = shift;
-    print $self->{logout_form}->render . "<hr />";
+    print $self->{logout_form}->render;
+    $self->link_hook();
+    print "<hr />";
     my $query = "Queue = '" . $self->queuename ."' AND (Status = 'open' OR Status = 'new' OR Status = 'stalled')";
     if($self->has_login) {
 	$query = "Creator = '" . $self->{user} . "' AND " . $query;
@@ -332,7 +340,9 @@ sub non_index_action {
     # happens before form render or back button, THAT WAY THAT DOESN'T SHOW UP
 
     $self->{logout_form}->title($self->{logout_form}->title . ": " . ($self->{mode} eq "edit" ? "edit" : "new") . " " . $self->{type} . " request");
-    print $self->{logout_form}->render . "<hr />";
+    print $self->{logout_form}->render;
+    $self->link_hook();
+    print "<hr />";
     my $form = $self->{form};
     
     $self->pre_validate();

@@ -28,6 +28,11 @@ sub init {
     $self->{buttons} = \%button_names;
 }
 
+sub link_hook {
+    print "<a href=\"http://schedule.freegeek.org/\">Go back to staff schedule</a>\n";
+    return;
+}
+
 sub ordered_types {
     return qw(meeting vacation hours schedule);
 }
