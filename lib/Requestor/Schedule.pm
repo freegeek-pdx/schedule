@@ -122,24 +122,34 @@ sub setup {
     if($type eq 'schedule' || $type eq 'vacation') {
 	$form->field(name => 'end_date_chooser', type => 'button', label => '', value => 'End Date Chooser');
     }
+}
 
+sub list_potential_cc {
+    my $self = shift;
+    my @cc = $self->current_cc($self->{tid});
     my @workers = $self->list_staff();
-    foreach my $w(@workers) {
+    my @ident_workers = map {_ident($_)} @workers;
+    foreach my $w(@cc) {
 	my $ident = _ident($w);
-	$form->field(name => $ident, label => escapeHTML($w), type => 'checkbox', options => ['Add to Cc'], class => 'hide');
+	my @found = grep /$ident/, @ident_workers;
+	if(scalar(@found) == 0) {
+	    unshift @workers, $w;
+	    unshift @ident_workers, $ident;
+	}
     }
+    return @workers;
 }
 
 sub cc {
     my $self = shift;
     my $form = $self->{form};
-    my @workers = $self->list_staff();
+    my @workers = $self->list_potential_cc();
     my @list = ();
     foreach my $w(@workers) {
 	my $ident = _ident($w);
 	my $value = $form->field($ident) || "";
 	if($value eq "Add to Cc") {
-	    push @list, @{[$w =~ /<(.+)>/]}[0];
+	    push @list, (@{[$w =~ /<(.+)>/]}[0] || $w);
 	}
 	
     }
@@ -223,11 +233,18 @@ sub parse {
     my $form = $self->{form};
     my $subject = $self->{subject};
     my $char = $self->{char};
+
+    # needed even if submitted, defines form fields
+    my @workers = $self->list_potential_cc();
+    foreach my $w(@workers) {
+	my $ident = _ident($w);
+	$form->field(name => $ident, label => escapeHTML($w), type => 'checkbox', options => ['Add to Cc'], class => 'hide');
+    }
+
     unless($form->submitted) {
 	my @cc = $self->current_cc($self->{tid});
 	foreach my $w(@cc) {
 	    my $ident = _ident($w);
-	    debug(0, 'Found CC: ' . $w);
 	    $form->field(name => $ident, value => 'Add to Cc');
 	}
 
