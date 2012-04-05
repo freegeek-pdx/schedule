@@ -268,7 +268,7 @@ sub save_changes {
 	# FIXME when no has_login
 	$self->{tid} = $self->{rt}->create(type => 'ticket', set => {priority => 0,
 						     requestors => [$self->get_email_for_user($self->{user})],
-                                                     cc => $self->cc,
+                                                     cc => [$self->cc()],
 						     queue => $self->queuename,
 						     subject => $subject}, text => $text)
     }
@@ -339,6 +339,10 @@ sub index {
     }
 }
 
+sub parse_new_action {
+    return;
+}
+
 sub non_index_action {
     my $self = shift;
     my $fname = $self->{mode};
@@ -355,6 +359,8 @@ sub non_index_action {
 
     if(defined($self->{tid})) {
 	$self->parse;
+    } else {
+	$self->parse_new_action;
     }
 
     # happens before form render or back button, THAT WAY THAT DOESN'T SHOW UP

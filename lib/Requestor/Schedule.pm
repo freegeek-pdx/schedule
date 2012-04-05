@@ -126,7 +126,10 @@ sub setup {
 
 sub list_potential_cc {
     my $self = shift;
-    my @cc = $self->current_cc($self->{tid});
+    my @cc = ();
+    if(!$self->{new_only}) {
+	@cc = $self->current_cc($self->{tid});
+    }
     my @workers = $self->list_staff();
     my @ident_workers = map {_ident($_)} @workers;
     foreach my $w(@cc) {
@@ -225,7 +228,17 @@ sub preparse {
     } else {
 	$self->{char} = $self->dchar_type();
     }
+}
 
+sub parse_new_action {
+    # this is done later on if editing, to include extra people
+    my $self = shift;
+    my $form = $self->{form};
+    my @workers = $self->list_potential_cc();
+    foreach my $w(@workers) {
+	my $ident = _ident($w);
+	$form->field(name => $ident, label => escapeHTML($w), type => 'checkbox', options => ['Add to Cc'], class => 'hide');
+    }
 }
 
 sub parse {
@@ -235,10 +248,8 @@ sub parse {
     my $char = $self->{char};
 
     # needed even if submitted, defines form fields
-    my @workers = $self->list_potential_cc();
-    foreach my $w(@workers) {
-	my $ident = _ident($w);
-	$form->field(name => $ident, label => escapeHTML($w), type => 'checkbox', options => ['Add to Cc'], class => 'hide');
+    if(!$self->{new_only}) {
+	$self->parse_new_action();
     }
 
     unless($form->submitted) {
