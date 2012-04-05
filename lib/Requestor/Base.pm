@@ -237,6 +237,17 @@ sub get_subject {
     $self->{rt}->show(type => 'ticket', id => $id)->{Subject};
 }
 
+sub current_cc {
+    my ($self, $id) = @_;
+    my $cc = $self->{rt}->show(type => 'ticket', id => $id)->{Cc};
+    my @list = split ', ', $cc;
+    return @list;
+}
+
+sub cc {
+    return ();
+}
+
 sub save_changes {
     my($self, $subject, $text) = @_;
     if(defined($self->{tid})) {
@@ -250,14 +261,23 @@ sub save_changes {
 	unless($cur_subject eq $subject) {  # disable?
 	    $self->{rt}->edit (type => 'ticket', id => $self->{tid}, set => { subject => $subject });
 	}
+	if($self->handles_cc() == 1) {
+	    $self->{rt}->edit (type => 'ticket', id => $self->{tid}, set => { cc => [$self->cc()] });
+	}
     } else {
+	# FIXME when no has_login
 	$self->{tid} = $self->{rt}->create(type => 'ticket', set => {priority => 0,
-						     requestors => [$self->get_email_for_user($self->{user})], # FIXME when no has_login
+						     requestors => [$self->get_email_for_user($self->{user})],
+                                                     cc => $self->cc,
 						     queue => $self->queuename,
 						     subject => $subject}, text => $text)
     }
     $self->{subject} = $subject;
     return $self->{tid};
+}
+
+sub handles_cc {
+    return 0;
 }
 
 sub dchar_type {
@@ -375,6 +395,11 @@ sub pre_validate {
 	    }
 	}
     }
+    $self->pre_validate_hook();
+}
+
+sub pre_validate_hook {
+    
 }
 
 sub render {
@@ -406,8 +431,13 @@ sub render {
 </script>
 ';
     }
+
+    $self->post_render_hook();
 }
 
+sub post_render_hook {
+    return;
+}
 
 sub do_save {
     my ($self, $subject, $text) = @_;

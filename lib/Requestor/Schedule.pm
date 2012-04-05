@@ -5,7 +5,18 @@ use warnings;
 
 use Requestor::Base;
 
+use RT::Client::REST::Group;
+use CGI qw(escapeHTML);
+
 use base 'Requestor::Base';
+
+use CGI::FormBuilder::Util;
+
+use DBI;
+use DBD::Pg;
+
+# This is the id of FGPaidworkers and FGCollective (1292);
+my $staff_group = 94421;
 
 # implementor API:
 # init: set button_names, types, queuename, 
@@ -31,6 +42,16 @@ sub init {
 sub link_hook {
     print "<a href=\"http://schedule.freegeek.org/\">Go back to staff schedule</a>\n";
     return;
+}
+
+sub post_render_hook {
+    print "<script>vis_value = false; function toggle_visible(){vis_value = !vis_value; var a = document.getElementsByClassName('hide'); for(var i = 0; i < a.length; i++) { a[i].parentNode.parentNode.hidden = vis_value; }} toggle_visible();</script>\n";
+    print "<a href=\"#\" onClick=\"toggle_visible();\">Click to Cc other workers on this request.</a>\n";
+    return;
+}
+
+sub handles_cc {
+    return 1;
 }
 
 sub ordered_types {
@@ -101,6 +122,75 @@ sub setup {
     if($type eq 'schedule' || $type eq 'vacation') {
 	$form->field(name => 'end_date_chooser', type => 'button', label => '', value => 'End Date Chooser');
     }
+
+    my @workers = $self->list_staff();
+    foreach my $w(@workers) {
+	my $ident = _ident($w);
+	$form->field(name => $ident, label => escapeHTML($w), type => 'checkbox', options => ['Add to Cc'], class => 'hide');
+    }
+}
+
+sub cc {
+    my $self = shift;
+    my $form = $self->{form};
+    my @workers = $self->list_staff();
+    my @list = ();
+    foreach my $w(@workers) {
+	my $ident = _ident($w);
+	my $value = $form->field($ident) || "";
+	if($value eq "Add to Cc") {
+	    push @list, @{[$w =~ /<(.+)>/]}[0];
+	}
+	
+    }
+    return @list;
+}
+
+sub _ident {
+    my $w = shift;
+    my $ident = @{[$w =~ /<(.+)>/]}[0];
+    if(!defined($ident)) {
+	$ident = $w;
+    }
+    $ident =~ s/[\.@+]/_/g;
+    return $ident;
+}
+
+sub list_staff {
+# parse the configuration file in an ugly way
+
+    my @lines = `cat /etc/request-tracker3.8/RT_SiteConfig.pm | grep -E "^Set.*Database(Name|User|Password)" | sort | cut -d "'" -f 2`;
+    my ($name, $password, $user);
+    if(scalar(@lines) == 3) {
+	($name, $password, $user) = @lines;
+    } elsif(scalar(@lines) == 2) {
+	($name, $password, $user) = ('rtdb', $lines[0], $lines[1]);
+    } else {
+	die "Could not process configuration."
+	}
+    chomp($name, $password, $user);
+
+# query the database for the list
+
+    my $dbh = DBI->connect("dbi:Pg:dbname=$name" . ($ENV{FG_RT_HOST} ? (";host=" . $ENV{FG_RT_HOST}) : ""), $user, $password, {AutoCommit => 0}) or die "Couldn't connect to database: " . DBI->errstr;
+    my $sth = $dbh->prepare("SELECT DISTINCT realname || ' <' || emailaddress || '>' FROM users INNER JOIN cachedgroupmembers ON cachedgroupmembers.memberid = users.id AND cachedgroupmembers.groupid = " . $staff_group . " INNER JOIN principals ON principals.disabled = 0 AND principals.principaltype LIKE 'User' AND principals.objectid = users.id WHERE emailaddress != '' ORDER BY 1;");
+    $sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
+    my @results = ();
+    while (my @data = $sth->fetchrow_array()) {
+	push @results, $data[0];
+    }
+    $dbh->disconnect();
+
+# sort the list to return
+
+    sub cleanup {
+      my $in = uc(shift);
+      $in =~ s/^"//;
+      return $in;
+    }
+    @results = sort {cleanup($a) cmp cleanup($b)} @results;
+
+    return @results;
 }
 
 sub preparse {
@@ -134,6 +224,13 @@ sub parse {
     my $subject = $self->{subject};
     my $char = $self->{char};
     unless($form->submitted) {
+	my @cc = $self->current_cc($self->{tid});
+	foreach my $w(@cc) {
+	    my $ident = _ident($w);
+	    debug(0, 'Found CC: ' . $w);
+	    $form->field(name => $ident, value => 'Add to Cc');
+	}
+
 	if($char eq "o") {
 	    my $name = $subject;
 	    $form->field(name => 'name', value => $name);
