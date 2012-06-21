@@ -16,7 +16,8 @@ use DBI;
 use DBD::Pg;
 
 # This is the id of FGPaidworkers and FGCollective (1292);
-my $staff_group = 94421;
+#my $staff_group = 94421;
+my $staff_group = 131528; # FGSchedule, now.
 
 # implementor API:
 # init: set button_names, types, queuename, 
@@ -39,8 +40,37 @@ sub init {
     $self->{buttons} = \%button_names;
 }
 
+sub showfile {
+    my $self = shift;
+    print $self->{logout_form}->render;
+    print '<hr />';
+    if($self->{session}->param('IS_LOGGED_IN')) {
+	open my $F, '<', '/root/schedule/sched.html';
+	my @a = <$F>;
+	print join '', @a;
+    }
+    print '<hr />';
+    print $self->quickform('back', 'Back to Main Page', 'index')->render;
+}
+
+sub do_main {
+    my $self = shift;
+    if($self->{mode} eq "index") {
+	$self->index;
+    } elsif($self->{mode} eq "sched") {
+	$self->showfile;
+    } else {
+	$self->non_index_action;
+    }
+}
+
 sub link_hook {
     print "<a href=\"http://schedule.freegeek.org/\">Go back to staff schedule</a>\n";
+    return; # TODO: FIXME. HERE.
+    my $self = shift;
+    if($self->{session}->param('IS_LOGGED_IN')) {
+	print $self->quickform('sched', 'View Staff Schedule', 'sched')->render;
+    }
     return;
 }
 
