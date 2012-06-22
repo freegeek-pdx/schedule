@@ -96,6 +96,11 @@ sub get_email_for_user {
     return RT::Client::REST::User->new( rt  => $self->{rt}, id => $user )->retrieve->email_address;
 }
 
+sub title {
+    my $self = shift;
+    return $self->queuename . ' RT request (login same as todo.freegeek.org)';
+}
+
 sub run {
     my $self = shift;
     my $hostname = `hostname`;
@@ -107,7 +112,7 @@ sub run {
 	);
 
     my @fields = ('username', 'password');
-    my $masterform = CGI::MyFormBuilder->new(fields => \@fields, header => 1, method   => 'post', keepextras => ['mode'], required => 'ALL', name => 'login', title => $self->queuename . ' RT request (login same as todo.freegeek.org)');
+    my $masterform = CGI::MyFormBuilder->new(fields => \@fields, header => 1, method   => 'post', keepextras => ['mode'], required => 'ALL', name => 'login', title => $self->title);
 
     $masterform->field(name => 'password', type => 'password');
     my $session = CGI::Session->new('driver:File',

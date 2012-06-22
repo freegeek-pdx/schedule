@@ -40,12 +40,16 @@ sub init {
     $self->{buttons} = \%button_names;
 }
 
+sub title {
+    return 'Free Geek Staff Schedule (login same as todo.freegeek.org)';
+}
+
 sub showfile {
     my $self = shift;
     print $self->{logout_form}->render;
     print '<hr />';
     if($self->{session}->param('IS_LOGGED_IN')) {
-	open my $F, '<', '/root/schedule/sched.html';
+	open my $F, '<', '/home/staffsched/web/index.html';
 	my @a = <$F>;
 	print join '', @a;
     }
@@ -65,8 +69,6 @@ sub do_main {
 }
 
 sub link_hook {
-    print "<a href=\"http://schedule.freegeek.org/\">Go back to staff schedule</a>\n";
-    return; # TODO: FIXME. HERE.
     my $self = shift;
     if($self->{session}->param('IS_LOGGED_IN')) {
 	print $self->quickform('sched', 'View Staff Schedule', 'sched')->render;
