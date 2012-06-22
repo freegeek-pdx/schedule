@@ -41,8 +41,7 @@ sub init {
 }
 
 sub displaymessage {
-    return ''; # FIXME REMOVEME
-    return '<span style="color: red;">Viewing the staff schedule requires logging in now.</span>';
+    return 'Note: viewing the staff schedule requires logging in now.';
 }
 
 sub title {
@@ -204,6 +203,11 @@ sub _ident {
     }
     $ident =~ s/[\.@+]/_/g;
     return $ident;
+}
+
+sub pre_validate_hook {
+    my $self = shift;
+#    $self->{form}->text("<a href=\"#\" onClick=\"toggle_visible();\">Click to Cc other workers on this request.</a>\n");
 }
 
 sub list_staff {
