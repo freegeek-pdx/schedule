@@ -40,6 +40,11 @@ sub init {
     $self->{buttons} = \%button_names;
 }
 
+sub displaymessage {
+    return ''; # FIXME REMOVEME
+    return '<span style="color: red;">Viewing the staff schedule requires logging in now.</span>';
+}
+
 sub title {
     return 'Free Geek Staff Schedule (login same as todo.freegeek.org)';
 }

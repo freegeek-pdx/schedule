@@ -204,8 +204,13 @@ sub run {
     } else {
 	$masterform->field(name => 'password',value => '',		   force => 1);
 	print $masterform->render;
+	print $self->displaymessage;
 	$self->link_hook();
     }
+}
+
+sub displaymessage {
+    return '';
 }
 
 sub link_hook() {
