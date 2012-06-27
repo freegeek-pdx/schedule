@@ -207,7 +207,7 @@ sub _ident {
 
 sub pre_validate_hook {
     my $self = shift;
-#    $self->{form}->text("<a href=\"#\" onClick=\"toggle_visible();\">Click to Cc other workers on this request.</a>\n");
+    $self->{form}->text("<b>This schedule request might affect floor shift coverage. You must copy your supervisor and any other supervisors of affected areas (collective workers: alert DPPs, DPPs: alert schedulers).</b>\n");
 }
 
 sub list_staff {
