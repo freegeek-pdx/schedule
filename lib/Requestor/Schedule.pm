@@ -37,7 +37,7 @@ sub init {
     my %button_names;
     $button_names{meeting} = 'Request a meeting';
     $button_names{vacation} = 'Request a vacation';
-    $button_names{hours} = 'Request schedule history corrections to stop hours logging reminders';
+    $button_names{hours} = 'Request history corrections for hours logging';
     $button_names{schedule} = 'Request other schedule changes';
     $self->{buttons} = \%button_names;
 }
@@ -134,7 +134,7 @@ sub setup {
     my $dateformat = '/^[0-9]{4}\/?(0?[1-9]|1[0-2])\/?(0?[1-9]|[1-2][0-9]|3[0-1])$/';
 
     $form->field(name => 'name', label => 'Worker Name', type => 'text', required => 1);
-    $form->field(name => 'notes', type => 'textarea',  cols => '80', rows => '10');
+    $form->field(name => 'notes', label => 'Specify the requested changes', type => 'textarea',  cols => '80', rows => '10', required => $self->{new_only});
     unless($type eq 'other') {
 	$form->field(name => 'date', label => 'Requested Date (YYYY/MM/DD)', type => 'text', required => 1, validate => $dateformat);
 	$form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
@@ -147,12 +147,12 @@ sub setup {
 	$form->field(name => 'end_date', label => 'End Date (YYYY/MM/DD, leave empty for ongoing)', type => 'text', validate => $dateformat);
     } elsif($type eq "meeting") {
 	$form->field(name => 'name', label => 'Meeting Name');
-	$form->field(name => 'notes', label => 'Specify list of attendees and any other details', required => $self->{new_only});
+	$form->field(name => 'notes', label => 'Specify list of attendees and any other details');
     } elsif($type eq "hours") {
-	# do nothing
 	$form->field(name => 'date', label => 'Date (YYYY/MM/DD)');
     } elsif($type eq "vacation") {
 	$form->field(name => 'end_date', label => 'End Date (YYYY/MM/DD, leave empty if only one day)', type => 'text', validate => $dateformat);
+	$form->field(name => 'notes', label => 'Specify shifts needing coverage and any tentative plans');
     } else {
 	$form->field(name => 'name', label => 'Request Name');
     }
