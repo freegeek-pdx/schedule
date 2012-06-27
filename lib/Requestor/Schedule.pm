@@ -15,9 +15,11 @@ use CGI::FormBuilder::Util;
 use DBI;
 use DBD::Pg;
 
-# This is the id of FGPaidworkers and FGCollective (1292);
-#my $staff_group = 94421;
-my $staff_group = 131528; # FGSchedule, now.
+my $siteconfig = "/etc/request-tracker3.8/RT_SiteConfig.pm";
+
+my $management_group = 1292; # FGCollective
+my $all_staff_group = 94421; # FGPaidworkers
+my $access_group = 131528; # FGSchedule, now.
 
 # implementor API:
 # init: set button_names, types, queuename, 
@@ -210,10 +212,23 @@ sub pre_validate_hook {
     $self->{form}->text("<b>This schedule request might affect floor shift coverage. You must copy your supervisor and any other supervisors of affected areas (collective workers: alert DPPs, DPPs: alert schedulers).</b>\n");
 }
 
-sub list_staff {
+sub user_is_allowed {
+    my $self = shift;
+    my $user = shift;
+    my @results = query_rt_group($access_group, "users.id");
+    my $u = RT::Client::REST::User->new(
+					   rt  => $self->{rt},
+					   id  => $user,
+					)->retrieve;
+    my $uid = $u->id;
+    return(grep /^$uid$/, @results);
+}
+
+sub query_rt_group {
+    my ($group, $column) = @_;
 # parse the configuration file in an ugly way
 
-    my @lines = `cat /etc/request-tracker3.8/RT_SiteConfig.pm | grep -E "^Set.*Database(Name|User|Password)" | sort | cut -d "'" -f 2`;
+    my @lines = `cat $siteconfig | grep -E "^Set.*Database(Name|User|Password)" | sort | cut -d "'" -f 2`;
     my ($name, $password, $user);
     if(scalar(@lines) == 3) {
 	($name, $password, $user) = @lines;
@@ -227,13 +242,19 @@ sub list_staff {
 # query the database for the list
 
     my $dbh = DBI->connect("dbi:Pg:dbname=$name" . ($ENV{FG_RT_HOST} ? (";host=" . $ENV{FG_RT_HOST}) : ""), $user, $password, {AutoCommit => 0}) or die "Couldn't connect to database: " . DBI->errstr;
-    my $sth = $dbh->prepare("SELECT DISTINCT realname || ' <' || emailaddress || '>' FROM users INNER JOIN cachedgroupmembers ON cachedgroupmembers.memberid = users.id AND cachedgroupmembers.groupid = " . $staff_group . " INNER JOIN principals ON principals.disabled = 0 AND principals.principaltype LIKE 'User' AND principals.objectid = users.id WHERE emailaddress != '' ORDER BY 1;");
+    my $sth = $dbh->prepare("SELECT DISTINCT " . $column . " FROM users INNER JOIN cachedgroupmembers ON cachedgroupmembers.memberid = users.id AND cachedgroupmembers.groupid = " . $group . " INNER JOIN principals ON principals.disabled = 0 AND principals.principaltype LIKE 'User' AND principals.objectid = users.id WHERE emailaddress != '' ORDER BY 1;");
     $sth->execute() or die "Couldn't execute statement: " . $sth->errstr;
     my @results = ();
     while (my @data = $sth->fetchrow_array()) {
 	push @results, $data[0];
     }
     $dbh->disconnect();
+
+    return @results;
+}
+
+sub list_staff {
+    my @results = query_rt_group($all_staff_group, "realname || ' <' || emailaddress || '>'");
 
 # sort the list to return
 

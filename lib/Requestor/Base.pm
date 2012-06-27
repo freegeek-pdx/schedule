@@ -101,6 +101,10 @@ sub title {
     return $self->queuename . ' RT request (login same as todo.freegeek.org)';
 }
 
+sub user_is_allowed {
+    return 1;
+}
+
 sub run {
     my $self = shift;
     my $hostname = `hostname`;
@@ -181,6 +185,13 @@ sub run {
 	    $success = 0;
 	};
 
+	$self->{rt} = $rt;
+	if($success) {
+	    $success = $self->user_is_allowed($user);
+	    if(!$success) {
+		$error = "The user $user is not a member of the group required for access.";
+	    }
+	}
 	if($success) {
 	    $session->param('IS_LOGGED_IN', 1);
 	    $session->param('username', $user);
@@ -193,9 +204,9 @@ sub run {
 	    $self->{mode} = $mode;
 	    $self->{tid} = $tid;
 	    $self->{logout_form} = $logout_form;
-	    $self->{rt} = $rt;
 	    $self->do_main;
 	} else {
+	    $self->{rt} = undef;
 	    $masterform->text($error);
 	    $masterform->field(name => 'password',value => '',		   force => 1);
 	    print $masterform->render;
