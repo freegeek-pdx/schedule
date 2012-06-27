@@ -209,7 +209,24 @@ sub _ident {
 
 sub pre_validate_hook {
     my $self = shift;
-    $self->{form}->text("<b>This schedule request might affect floor shift coverage. You must copy your supervisor and any other supervisors of affected areas (collective workers: alert DPPs, DPPs: alert schedulers).</b>\n");
+    return 1 if($self->{type} eq "hours");
+    my $base = "<b>This schedule request might affect floor shift coverage. You must copy your supervisor and any other supervisors of affected areas (collective workers: alert DPPs, DPPs: alert schedulers).</b>\n";
+    if($self->{form}->submitted) {
+	my @results = query_rt_group($management_group, "realname || ' <' || emailaddress || '>'");
+	foreach my $w(@results) {
+	    my $ident = _ident($w);
+	    my $value = $self->{form}->field($ident) || "";
+	    if($value eq "Add to Cc") {
+		$self->{form}->text($base);
+		return 1;
+	    }
+	}
+	$self->{form}->text("<span style=\"color: #cc0000;\"><b>Error: You must Cc at least one collective member.</b></span><br/>\n" . $base);
+	return 0;
+    } else {
+	$self->{form}->text($base);
+	return 1;
+    }
 }
 
 sub user_is_allowed {
@@ -297,9 +314,17 @@ sub parse_new_action {
     my $self = shift;
     my $form = $self->{form};
     my @workers = $self->list_potential_cc();
+    my @management = query_rt_group($management_group, "realname || ' <' || emailaddress || '>'");
+    @management = map {_ident($_)} @management;
     foreach my $w(@workers) {
 	my $ident = _ident($w);
-	$form->field(name => $ident, label => escapeHTML($w), type => 'checkbox', options => ['Add to Cc'], class => 'hide');
+	my $css_class = 'hide';
+	my $label = $w;
+	if(grep /$ident/, @management) {
+	    $css_class = '';
+	    $label =~ s/ </ (collective) </g;
+	}
+	$form->field(name => $ident, label => escapeHTML($label), type => 'checkbox', options => ['Add to Cc'], class => $css_class);
     }
 }
 

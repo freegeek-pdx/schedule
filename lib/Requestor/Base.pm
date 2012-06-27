@@ -391,10 +391,14 @@ sub non_index_action {
     $self->link_hook();
     print "<hr />";
     my $form = $self->{form};
-    
-    $self->pre_validate();
 
-    if($form->submitted && $form->validate) {
+    my $success = $self->pre_validate();
+    if($form->submitted) {
+	$success = $form->validate && $success;
+    } else {
+	$success = 0;
+    }
+    if($success) {
 	$self->save;
 #	$self->{mode} = "index";
 #	return $self->do_main;
@@ -422,11 +426,11 @@ sub pre_validate {
 	    }
 	}
     }
-    $self->pre_validate_hook();
+    return $self->pre_validate_hook();
 }
 
 sub pre_validate_hook {
-    
+    return 1;
 }
 
 sub render {
