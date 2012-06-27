@@ -333,27 +333,29 @@ sub index {
 	type => 'ticket',
 	query => $query
 	); 
-    print '<h4>Add to or change existing request:</h4>';
-    my %idhash;
-    my %dchash;
-    for my $id (@ids) {
-	my $subj = $self->get_subject($id);
-	$idhash{$id} = $subj;
-	$dchash{$id} = $subj . "";
-	$dchash{$id} =~ tr/A-Z/a-z/;
+    if(scalar(@ids) > 0) {
+	print '<h4>Add to or change existing request:</h4>';
+	my %idhash;
+	my %dchash;
+	for my $id (@ids) {
+	    my $subj = $self->get_subject($id);
+	    $idhash{$id} = $subj;
+	    $dchash{$id} = $subj . "";
+	    $dchash{$id} =~ tr/A-Z/a-z/;
+	}
+	my @sorted = sort { $dchash{$a} cmp $dchash{$b} } keys %idhash;
+	foreach(@sorted) {
+	    my $id = $_;
+	    my $subj = $idhash{$id};
+	    print $self->quicklink('ticket_$id','#' . $id . ": " . $subj, 'edit', $id);
+	}
+	my $o_ticket_form = CGI::MyFormBuilder->new(fields => ['tid'], method   => 'post', submit => 'Edit ticket', name => 'arbitrary_ticket', keepextras => ['mode'], labels => {'tid' => 'Other ticket'});
+	$o_ticket_form->cgi_param('mode', 'edit'); # FIXME: other end needs ot verify that this is in correct queue
+	unless($self->hide_other_ticket_f) {
+	    print $o_ticket_form->render;
+	}
+	print "<hr />";
     }
-    my @sorted = sort { $dchash{$a} cmp $dchash{$b} } keys %idhash;
-    foreach(@sorted) {
-	my $id = $_;
-	my $subj = $idhash{$id};
-	print $self->quicklink('ticket_$id','#' . $id . ": " . $subj, 'edit', $id);
-    }
-    my $o_ticket_form = CGI::MyFormBuilder->new(fields => ['tid'], method   => 'post', submit => 'Edit ticket', name => 'arbitrary_ticket', keepextras => ['mode'], labels => {'tid' => 'Other ticket'});
-    $o_ticket_form->cgi_param('mode', 'edit'); # FIXME: other end needs ot verify that this is in correct queue
-    unless($self->hide_other_ticket_f) {
-	print $o_ticket_form->render;
-    }
-    print "<hr />";
     print '<h4>New request:</h4>';    
     foreach($self->ordered_types) {
 	print $self->quickform('new_$_',$self->button_names->{$_}, 'new_' . $_)->render;
