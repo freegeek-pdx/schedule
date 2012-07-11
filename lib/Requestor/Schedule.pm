@@ -210,7 +210,7 @@ sub _ident {
 sub pre_validate_hook {
     my $self = shift;
     return 1 if($self->{type} eq "hours");
-    my $base = "<b>This schedule request might affect floor shift coverage. You must copy your supervisor and any other supervisors of affected areas (collective workers: alert DPPs, DPPs: alert schedulers).</b>\n";
+    my $base = "<table><td><th colspan=\"2\">This schedule request might affect floor shift coverage.</th></td><tr><th>All Workers:</th><td>You must copy your supervisor and any other supervisors of affected areas</td></tr><tr><th>Collective Workers:</th><td>Alert DPPs</td></tr><tr><th>DPPs:</th><td>Alert Schedulers</td></tr></table>\n";
     if($self->{form}->submitted) {
 	my @results = query_rt_group($management_group, "realname || ' <' || emailaddress || '>'");
 	foreach my $w(@results) {
