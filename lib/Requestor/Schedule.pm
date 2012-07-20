@@ -52,10 +52,11 @@ sub title {
 
 sub showfile {
     my $self = shift;
-    print $self->{logout_form}->render;
+    $self->render_top();
     print '<hr />';
     if($self->{session}->param('IS_LOGGED_IN')) {
-	open my $F, '<', '/home/staffsched/web/index.html';
+	open my $F, '<', $self->{mode} eq 'sched' ? '/home/staffsched/web/index.html' : '/home/staffsched/web/meetings.html';
+	binmode $F, ':utf8';
 	my @a = <$F>;
 	print join '', @a;
     }
@@ -67,7 +68,7 @@ sub do_main {
     my $self = shift;
     if($self->{mode} eq "index") {
 	$self->index;
-    } elsif($self->{mode} eq "sched") {
+    } elsif($self->{mode} eq "sched" or $self->{mode} eq 'meetings') {
 	$self->showfile;
     } else {
 	$self->non_index_action;
@@ -77,7 +78,12 @@ sub do_main {
 sub link_hook {
     my $self = shift;
     if($self->{session}->param('IS_LOGGED_IN')) {
-	print $self->quickform('sched', 'View Staff Schedule', 'sched')->render;
+	if($self->{mode} ne "sched") {
+	    print $self->quickform('sched', 'View Staff Schedule', 'sched')->render;
+	}
+	if($self->{mode} ne "meetings") {
+	    print $self->quickform('meetings', 'View Perpetual Meeting Calendar', 'meetings')->render;
+	}
     }
     return;
 }

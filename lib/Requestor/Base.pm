@@ -19,7 +19,7 @@ sub action {
 
 sub script {
     my $self = shift;
-    my $append = $self->{header} ? '<script type="text/javascript" src="/cgi-bin/static/calendar.js"></script><link rel="stylesheet" href="/cgi-bin/static/calendar.css"></link><link rel="stylesheet" href="/cgi-bin/static/scaffold.css"></link>' : '';
+    my $append = $self->{header} ? '<script type="text/javascript" src="/cgi-bin/static/calendar.js"></script><link rel="stylesheet" href="/cgi-bin/static/calendar.css"></link><link rel="stylesheet" href="/cgi-bin/static/scaffold.css"></link><link rel="stylesheet" href="/cgi-bin/static/empty.css" media="handheld"></link>' : '';
     return $append . CGI::FormBuilder::script($self, @_);
 }
 
@@ -65,6 +65,13 @@ sub new {
     bless $self, $class;
     $self->init;
     return $self;
+}
+
+sub render_top {
+    my $self = shift;
+    print $self->{logout_form}->render;
+    $self->link_hook;
+    return;
 }
 
 sub init {
@@ -322,8 +329,7 @@ sub hide_other_ticket_f {
 
 sub index {
     my $self = shift;
-    print $self->{logout_form}->render;
-    $self->link_hook();
+    $self->render_top();
     print "<hr />";
     my $query = "Queue = '" . $self->queuename ."' AND (Status = 'open' OR Status = 'new' OR Status = 'stalled')";
     if($self->has_login) {
@@ -389,8 +395,7 @@ sub non_index_action {
     # happens before form render or back button, THAT WAY THAT DOESN'T SHOW UP
 
     $self->{logout_form}->title($self->{logout_form}->title . ": " . ($self->{mode} eq "edit" ? "edit" : "new") . " " . $self->{type} . " request");
-    print $self->{logout_form}->render;
-    $self->link_hook();
+    $self->render_top();
     print "<hr />";
     my $form = $self->{form};
 
