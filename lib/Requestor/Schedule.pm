@@ -37,7 +37,7 @@ sub init {
     my %button_names;
     $button_names{meeting} = 'Request a meeting';
     $button_names{vacation} = 'Request a vacation';
-    $button_names{hours} = 'Request history corrections for hours logging';
+    $button_names{hours} = 'Request hours logging or removal from a day you did not work';
     $button_names{schedule} = 'Request other schedule changes';
     $self->{buttons} = \%button_names;
 }
