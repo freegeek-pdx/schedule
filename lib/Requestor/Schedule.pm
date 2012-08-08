@@ -156,6 +156,7 @@ sub setup {
 	$form->field(name => 'notes', label => 'Specify list of attendees and any other details');
     } elsif($type eq "hours") {
 	$form->field(name => 'date', label => 'Date (YYYY/MM/DD)');
+	$form->field(name => 'notes', label => 'Specify how many hours you worked in each place on each day, or the requested changes if you did not work');
     } elsif($type eq "vacation") {
 	$form->field(name => 'end_date', label => 'End Date (YYYY/MM/DD, leave empty if only one day)', type => 'text', validate => $dateformat);
 	$form->field(name => 'notes', label => 'Specify shifts needing coverage and any tentative plans');
