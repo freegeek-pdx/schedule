@@ -268,6 +268,11 @@ sub get_subject {
 sub current_cc {
     my ($self, $id) = @_;
     my $cc = $self->{rt}->show(type => 'ticket', id => $id)->{Cc};
+    my $cc2 = $self->{rt}->show(type => 'ticket', id => $id)->{AdminCc};
+    if(length($cc) > 0 && length($cc2) > 0) {
+	$cc .= ", ";
+    }
+    $cc .= $cc2;
     my @list = split ', ', $cc;
     return @list;
 }
@@ -290,13 +295,13 @@ sub save_changes {
 	    $self->{rt}->edit (type => 'ticket', id => $self->{tid}, set => { subject => $subject });
 	}
 	if($self->handles_cc() == 1) {
-	    $self->{rt}->edit (type => 'ticket', id => $self->{tid}, set => { cc => [$self->cc()] });
+	    $self->{rt}->edit (type => 'ticket', id => $self->{tid}, set => { AdminCc => [$self->cc()] });
 	}
     } else {
 	# FIXME when no has_login
 	$self->{tid} = $self->{rt}->create(type => 'ticket', set => {priority => 0,
 						     requestors => [$self->get_email_for_user($self->{user})],
-                                                     cc => [$self->cc()],
+                                                     AdminCc => [$self->cc()],
 						     queue => $self->queuename,
 						     subject => $subject}, text => $text)
     }
