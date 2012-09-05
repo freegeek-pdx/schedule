@@ -19,7 +19,7 @@ sub action {
 
 sub script {
     my $self = shift;
-    my $append = $self->{header} ? '<script type="text/javascript" src="/cgi-bin/static/calendar.js"></script><link rel="stylesheet" href="/cgi-bin/static/calendar.css"></link><link rel="stylesheet" href="/cgi-bin/static/scaffold.css"></link><link rel="stylesheet" href="/cgi-bin/static/empty.css" media="handheld"></link>' : '';
+    my $append = $self->{header} ? '<script type="text/javascript" src="/cgi-bin/static/calendar.js"></script><link rel="stylesheet" href="/cgi-bin/static/calendar.css"></link><link rel="stylesheet" href="/cgi-bin/static/scaffold.css"></link><link rel="stylesheet" href="/cgi-bin/static/empty.css" media="handheld"></link><meta name="viewport" content="width=device-width"/>' : '';
     return $append . CGI::FormBuilder::script($self, @_);
 }
 
