@@ -1,7 +1,7 @@
 package Requestor::OSAC;
 
 # list of options for sales type
-my @options = qw(ebay bulk_amazon test_sandbox);
+my @options = qw(ebay bulk-amazon test-sandbox);
 # max number of files fields
 my $max = 10;
 
