@@ -1,7 +1,7 @@
 package Requestor::OSAC;
 
 # list of options for sales type
-my @options = qw(ebay bulk_amazon);
+my @options = qw(ebay bulk_amazon test_sandbox);
 # max number of files fields
 my $max = 10;
 
@@ -11,12 +11,15 @@ my $file_base = "/srv/osac-images/";
 my $url_base = "/osac-images/";
 # display host for URLs, external rather than "freebay" or whatever the user typed
 my $host = "sales.freegeek.org";
+# log file
+my $log = "/var/log/osac.log";
 
 use strict;
 use warnings;
 
 use Requestor::Base;
 use CGI;
+use POSIX;
 
 use base 'Requestor::Base';
 
@@ -68,7 +71,10 @@ sub do_main {
 	print "<hr />";
 	my $dir_url = "http://" . $host . $url_base . $type . "/" . $date . "/" . $name . "/";
 	print "Files uploaded to: <a href=\"" . $dir_url . "\">" . $dir_url . "</a><br /><br />\n";
+	open my $LOG, ">>",  $log;
+	print $LOG strftime("%D %T", localtime) . ", user " . $self->{user} . " uploaded files to " . $dir . "\n";
 	foreach(1..$max) {
+	    print $LOG "";
 	    my $file = $form->field('filename_' . $_);
 	    if($file) {
 		open F, ">$dir/$file" or die $!;
@@ -77,6 +83,7 @@ sub do_main {
 		}
 		close F;
 		print "Processed " . $file . ": <a href=\"" . $dir_url . $file . "\">" . $dir_url . $file . "</a><br />\n";
+		print $LOG strftime("%D %T", localtime) . ", user " . $self->{user} . " saved " . $file . " in " . $dir . "\n";
 	    }
 	}
 	print "<br />" . $self->quickform("again", "Back to upload form", "again")->render;
