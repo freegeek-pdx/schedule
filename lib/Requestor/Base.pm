@@ -108,6 +108,11 @@ sub title {
     return $self->queuename . ' RT request (login same as todo.freegeek.org)';
 }
 
+sub title2 {
+    my $self = shift;
+    return $self->queuename . ' Requests';
+}
+
 sub user_is_allowed {
     return 1;
 }
@@ -134,7 +139,7 @@ sub run {
     $session->expire('+12h');
 
     my @lfields = ();
-    my $logout_form = CGI::MyFormBuilder->new(fields => \@lfields, header => 1, method   => 'post', submit => 'Logout', name => 'logout', required => 'ALL', title => $self->queuename . ' Requests');
+    my $logout_form = CGI::MyFormBuilder->new(fields => \@lfields, header => 1, method   => 'post', submit => 'Logout', name => 'logout', required => 'ALL', title => $self->title2);
     if(!$self->has_login) {
 	$logout_form->submit(0);
     }
