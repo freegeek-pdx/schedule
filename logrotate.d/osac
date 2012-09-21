@@ -1,0 +1,9 @@
+/var/log/osac.log {
+	monthly
+	missingok
+	rotate 12
+	compress
+	delaycompress
+	notifempty
+	create 640 www-data adm
+}
