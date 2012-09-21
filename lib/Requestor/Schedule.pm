@@ -307,7 +307,9 @@ sub validate_end_hook {
 	$str .= "<h2>Your past comments:</h2>";
 	while (my $tr = &$iterator) {
 	    if($tr->creator eq $self->{user} && $tr->content ne "This transaction appears to have no content") {
-		$str .= "<fieldset><h3>On " . $tr->created . ":</h3>" . $tr->content . "</fieldset>";
+		my $c = $tr->content;
+		$c =~ s/\n/<br \/>/g;
+		$str .= "<fieldset><h3>On " . $tr->created . ":</h3>" . $c . "</fieldset>";
 	    }
 	}
     }
