@@ -13,6 +13,8 @@ my $url_base = "/osac-images/";
 my $host = "sales.freegeek.org";
 # log file
 my $log = "/var/log/osac.log";
+# recent list file
+my $list_file = "/srv/osac-images.list";
 
 use strict;
 use warnings;
@@ -71,10 +73,12 @@ sub do_main {
 	print "<hr />";
 	my $dir_url = "http://" . $host . $url_base . $type . "/" . $date . "/" . $name . "/";
 	print "Files uploaded to: <a href=\"" . $dir_url . "\">" . $dir_url . "</a><br /><br />\n";
+	open my $LIST, ">>", $list_file;
+	print $LIST $type . "/" . $date . "/" . $name . "\n";
+	close $LIST;
 	open my $LOG, ">>",  $log;
 	print $LOG strftime("%D %T", localtime) . ", user " . $self->{user} . " uploaded files to " . $dir . "\n";
 	foreach(1..$max) {
-	    print $LOG "";
 	    my $file = $form->field('filename_' . $_);
 	    if($file) {
 		open F, ">$dir/$file" or die $!;
@@ -86,11 +90,19 @@ sub do_main {
 		print $LOG strftime("%D %T", localtime) . ", user " . $self->{user} . " saved " . $file . " in " . $dir . "\n";
 	    }
 	}
+	close $LOG;
 	print "<br />" . $self->quickform("again", "Back to upload form", "again")->render;
     } else {
 	$self->render_top();
 	print "<hr />";
 	print $form->render;
+    }
+    print "<hr />";
+    print "<h4>Last 10 Uploads</h4>";
+    my @flist = split '\n', `tail -10 $list_file`;
+    foreach(reverse(@flist)) {
+	my $u = "http://" . $host . $url_base . $_;
+	print "<a href=\"" . $u . "\">" . $u . "</a><br />\n";
     }
 }
 
