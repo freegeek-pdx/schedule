@@ -6,6 +6,8 @@ use warnings;
 use Requestor::Base;
 
 use RT::Client::REST::Group;
+use RT::Client::REST::Ticket;
+
 use CGI qw(escapeHTML);
 
 use base 'Requestor::Base';
@@ -228,10 +230,10 @@ sub pre_validate_hook {
 		return 1;
 	    }
 	}
-	$self->{form}->text("<span style=\"color: #cc0000;\"><b>Error: You must Cc at least one collective member.</b></span><br/>\n" . $base);
+	$self->{form}->text("<span style=\"color: #cc0000;\"><b>Error: You must Cc at least one collective member.</b></span><br/>\n" . $base . $self->validate_end_hook);
 	return 0;
     } else {
-	$self->{form}->text($base);
+	$self->{form}->text($base . $self->validate_end_hook);
 	return 1;
     }
 }
@@ -290,6 +292,26 @@ sub list_staff {
     @results = sort {cleanup($a) cmp cleanup($b)} @results;
 
     return @results;
+}
+
+sub validate_end_hook {
+    my $self = shift;
+    my $str = "";
+    if(defined($self->{tid})) {
+	 my $ticket = RT::Client::REST::Ticket->new(
+						    rt  => $self->{rt},
+						    id  => $self->{tid},
+						    )->retrieve;
+	my $transactions = $ticket->transactions;
+	my $iterator = $transactions->get_iterator;
+	$str .= "<h2>Your past comments:</h2>";
+	while (my $tr = &$iterator) {
+	    if($tr->creator eq $self->{user} && $tr->content ne "This transaction appears to have no content") {
+		$str .= "<fieldset><h3>On " . $tr->created . ":</h3>" . $tr->content . "</fieldset>";
+	    }
+	}
+    }
+    return $str;
 }
 
 sub preparse {
