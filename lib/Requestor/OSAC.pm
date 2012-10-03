@@ -98,6 +98,36 @@ sub do_main {
 	print $form->render;
     }
     print "<hr />";
+    print '<script>
+document.getElementById("unique_sale_item_name").onchange = function() {
+  var xmlhttp = new XMLHttpRequest();
+  var name = document.getElementById("unique_sale_item_name").value;
+  var type = document.getElementById("sale_type").value;
+  if(type.length == 0)
+    return;
+  if(name.length == 0)
+    return;
+  name = name.toLowerCase().replace(/ /g, "-");
+  var d = new Date;
+  var day = d.getDate().toString();
+  var month = (d.getMonth() + 1).toString();
+  var year = (d.getYear() + 1900).toString();
+  if(day.length == 1)
+    day = "0" + day;
+  if(month.length == 1)
+    month = "0" + month;
+  var date = year + month + day;
+  var url = "' . $url_base . '" + type + "/" + date + "/" + name + "/";
+  xmlhttp.open("HEAD", url, true);
+  xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+      alert("Warning: The provided item name and sale type have already been used today, some files may be overwritten!");
+    }
+  }
+  xmlhttp.send(null)
+}
+document.getElementById("sale_type").onchange = document.getElementById("unique_sale_item_name").onchange;
+</script>';
     print "<h4>Last 10 Uploads</h4>";
     my @flist = split '\n', `tail -10 $list_file`;
     foreach(reverse(@flist)) {
