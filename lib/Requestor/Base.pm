@@ -305,7 +305,7 @@ sub save_changes {
     } else {
 	# FIXME when no has_login
 	$self->{tid} = $self->{rt}->create(type => 'ticket', set => {priority => 0,
-						     requestors => [$self->get_email_for_user($self->{user})],
+						     requestor => [$self->get_email_for_user($self->{user})],
                                                      AdminCc => [$self->cc()],
 						     queue => $self->queuename,
 						     subject => $subject}, text => $text)
