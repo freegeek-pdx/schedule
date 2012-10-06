@@ -178,6 +178,12 @@ sub list_potential_cc {
 	@cc = $self->current_cc($self->{tid});
     }
     my @workers = $self->list_staff();
+    my $user = RT::Client::REST::User->new(
+					   rt  => $self->{rt},
+					   id  => $self->{user},
+					   )->retrieve;
+    my $value = $user->real_name . ' <' . $user->email_address . '>';
+    @workers = grep !/$value/, @workers;
     my @ident_workers = map {_ident($_)} @workers;
     foreach my $w(@cc) {
 	my $ident = _ident($w);
