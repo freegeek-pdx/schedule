@@ -35,6 +35,10 @@ use Date::Format;
 use strict;
 use warnings;
 
+sub preparse {
+    return;
+}
+
 sub has_end_date {
     return 0;
 }
@@ -305,13 +309,18 @@ sub save_changes {
     } else {
 	# FIXME when no has_login
 	$self->{tid} = $self->{rt}->create(type => 'ticket', set => {priority => 0,
-						     requestor => [$self->get_email_for_user($self->{user})],
+						     requestor => [$self->requestor],
                                                      AdminCc => [$self->cc()],
 						     queue => $self->queuename,
 						     subject => $subject}, text => $text)
     }
     $self->{subject} = $subject;
     return $self->{tid};
+}
+
+sub requestor {
+    my $self = shift;
+    return $self->get_email_for_user($self->{user});
 }
 
 sub handles_cc {
@@ -337,10 +346,15 @@ sub hide_other_ticket_f {
     return 1; # DEVEL
 }
 
+sub no_other {
+    return 0;
+}
+
 sub index {
     my $self = shift;
     $self->render_top();
     print "<hr />";
+    unless($self->no_other) {
     my $query = "Queue = '" . $self->queuename ."' AND (Status = 'open' OR Status = 'new' OR Status = 'stalled')";
     if($self->has_login) {
 	$query = "Creator = '" . $self->{user} . "' AND " . $query;
@@ -371,6 +385,7 @@ sub index {
 	    print $o_ticket_form->render;
 	}
 	print "<hr />";
+    }
     }
     print '<h4>New request:</h4>';    
     foreach($self->ordered_types) {
