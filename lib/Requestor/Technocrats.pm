@@ -7,6 +7,10 @@ use Requestor::Base;
 
 use base 'Requestor::Base';
 
+sub moreheader {
+    return '<link rel="stylesheet" href="/cgi-bin/static/techno.css"></link>';
+}
+
 sub hide_other_ticket_f {
     return 1;
 }
