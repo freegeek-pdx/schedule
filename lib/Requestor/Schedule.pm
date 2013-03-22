@@ -225,7 +225,7 @@ sub _ident {
 sub pre_validate_hook {
     my $self = shift;
     return 1 if($self->{type} eq "hours");
-    my $base = "<table><td><th colspan=\"2\">This schedule request might affect floor shift coverage.</th></td><tr><th>All Workers:</th><td>You must copy your supervisor and any other supervisors of affected areas</td></tr><tr><th>Collective Workers:</th><td>Alert DPPs</td></tr><tr><th>DPPs:</th><td>Alert Schedulers</td></tr></table>\n";
+    my $base = "<table><td><th colspan=\"2\">This schedule request might affect floor shift coverage.</th></td><tr><th>All Workers:</th><td>You must copy your supervisor and any other supervisors of affected areas</td></tr><tr><th>Management:</th><td>Alert Directors</td></tr><tr><th>Directors:</th><td>Alert Schedulers</td></tr></table>\n";
     if($self->{form}->submitted) {
 	my @results = query_rt_group($management_group, "realname || ' <' || emailaddress || '>'");
 	foreach my $w(@results) {
@@ -236,7 +236,7 @@ sub pre_validate_hook {
 		return 1;
 	    }
 	}
-	$self->{form}->text("<span style=\"color: #cc0000;\"><b>Error: You must Cc at least one collective member.</b></span><br/>\n" . $base . $self->validate_end_hook);
+	$self->{form}->text("<span style=\"color: #cc0000;\"><b>Error: You must Cc at least one management member.</b></span><br/>\n" . $base . $self->validate_end_hook);
 	return 0;
     } else {
 	$self->{form}->text($base . $self->validate_end_hook);
@@ -359,7 +359,7 @@ sub parse_new_action {
 	my $label = $w;
 	if(grep /$ident/, @management) {
 	    $css_class = '';
-	    $label =~ s/ </ (collective) </g;
+	    $label =~ s/ </ (management) </g;
 	}
 	$form->field(name => $ident, label => escapeHTML($label), type => 'checkbox', options => ['Add to Cc'], class => $css_class);
     }
