@@ -71,31 +71,35 @@ sub setup {
         type => 'text', required => 1);
 
     $form->field(name => 'area', 
-        label => 'Which area within Free Geek, if any, is your request related to?',
+        label => 'Which area within Free Geek is your request related to, if any?<br />
+            (i.e. Volunteer Desk, Tech Support, Warehouse)',
         type => 'text');
 
     $form->field(name => 'infrastructure',
-        label => 'Which infrastructure machine and/or existing software used at Free Geek, if any, is your request related to?',
+        label => 'Which infrastructure computer and/or software is your request related to?',
         type => 'text');
 
     $form->field(name => 'summary',
-        label => 'Please summarize your request in a few words that explain what the issue is:',
+        label => 'Please summarize your request in a few words:<br />
+            (i.e. Unable to print at volunteer desk, Joebob unable to send email, 
+            Install solitaire on database server)',
         type => 'text', required => 1);
 
     $form->field(name => 'details',
-        label => 'Please elaborate on the details of what you are trying to do and explain what you expect the outcome to be:',
+        label => 'Please explain in detail what you are trying to do, and what you expect the outcome to be:',
         type => 'textarea');
 
     $form->field(name => 'steps',
-        label => 'If our existing infrastructure already supports this functionality,<br />what are the exact steps you tried to complete this?',
+        label => 'What are the exact steps you tried to complete this (if applicable)?',
         type => 'textarea');
 
     $form->field(name => 'result',
-        label => 'If our existing infrastructure already supports this functionality,<br />what was the result you got and how is it different from the expected behavior?',
+        label => 'What was the result you got and how is it different from the expected behavior(if applicable)?',
         type => 'textarea');
 
     $form->field(name => 'additional_info',
-        label => 'Is there any other information that you think may help us investigate this issue?<br />(the date or time this problem occurred, specific data such as email addresses, contact IDs, crash IDs, etc)',
+        label => 'Please provide any other information that might help us investigate this issue.<br />
+        (date and time this problem occurred, specific data such as email addresses, contact IDs, crash IDs, cut-and-paste the exact error message displayed, etc.)',
         type => 'textarea');
 
 }
