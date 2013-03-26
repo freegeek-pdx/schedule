@@ -61,15 +61,43 @@ sub setup {
     my $form = $self->quickform($self->{fname}, 'Submit Changes', $self->{mode}, $self->{tid});
     $self->{form} = $form;
     my $type = $self->{type};
-    $form->field(name => 'name', label => 'What is your name?', type => 'text', required => 1);
-    $form->field(name => 'email', label => 'What is your email address?', type => 'text', required => 1);
-    $form->field(name => 'area', label => 'Which area within Free Geek, if any, is your request related to?', type => 'text');
-    $form->field(name => 'infrastructure', label => 'Which infrastructure machine and/or existing software used at Free Geek, if any, is your request related to?', type => 'text');
-    $form->field(name => 'summary', label => 'Please summarize your request in a few words that explain what the issue is:', type => 'text', required => 1);
-    $form->field(name => 'details', label => 'Please elaborate on the details of what you are trying to do and explain what you expect the outcome to be:', type => 'textarea');
-    $form->field(name => 'steps', label => 'If our existing infrastructure already supports this functionality,<br />what are the exact steps you tried to complete this?', type => 'textarea');
-    $form->field(name => 'result', label => 'If our existing infrastructure already supports this functionality,<br />what was the result you got and how is it different from the expected behavior?', type => 'textarea');
-    $form->field(name => 'additional_info', label => 'Is there any other information that you think may help us investigate this issue?<br />(the date or time this problem occurred, specific data such as email addresses, contact IDs, crash IDs, etc)', type => 'textarea');
+
+    $form->field(name => 'name', 
+        label => 'What is your name?', 
+        type => 'text', required => 1);
+
+    $form->field(name => 'email', 
+        label => 'What is your email address?',
+        type => 'text', required => 1);
+
+    $form->field(name => 'area', 
+        label => 'Which area within Free Geek, if any, is your request related to?',
+        type => 'text');
+
+    $form->field(name => 'infrastructure',
+        label => 'Which infrastructure machine and/or existing software used at Free Geek, if any, is your request related to?',
+        type => 'text');
+
+    $form->field(name => 'summary',
+        label => 'Please summarize your request in a few words that explain what the issue is:',
+        type => 'text', required => 1);
+
+    $form->field(name => 'details',
+        label => 'Please elaborate on the details of what you are trying to do and explain what you expect the outcome to be:',
+        type => 'textarea');
+
+    $form->field(name => 'steps',
+        label => 'If our existing infrastructure already supports this functionality,<br />what are the exact steps you tried to complete this?',
+        type => 'textarea');
+
+    $form->field(name => 'result',
+        label => 'If our existing infrastructure already supports this functionality,<br />what was the result you got and how is it different from the expected behavior?',
+        type => 'textarea');
+
+    $form->field(name => 'additional_info',
+        label => 'Is there any other information that you think may help us investigate this issue?<br />(the date or time this problem occurred, specific data such as email addresses, contact IDs, crash IDs, etc)',
+        type => 'textarea');
+
 }
 
 sub requestor {
