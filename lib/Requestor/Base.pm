@@ -248,6 +248,12 @@ sub run {
     }
 }
 
+sub transform {
+    my $self = shift;
+    my $value = shift;
+    return $value;
+}
+
 sub displaymessage {
     return '';
 }
@@ -481,7 +487,7 @@ sub render {
     my $self = shift;
     my $form = $self->{form};
     $form->{javascript} = 0;
-    print $form->render;
+    print $self->transform($form->render);
 
     if($self->has_date) {
     print '<script type="text/javascript">

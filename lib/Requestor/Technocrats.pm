@@ -12,6 +12,14 @@ use base 'Requestor::Base';
 #    return '<link rel="stylesheet" href="/cgi-bin/static/techno.css"></link>';
 #}
 
+
+sub transform {
+    my $self = shift;
+    my $value = shift;
+    $value =~ s/<\/td>[^<]+<td/<\/td><\/tr><tr><td/mg;
+    return $value;
+}
+
 sub hide_other_ticket_f {
     return 1;
 }
