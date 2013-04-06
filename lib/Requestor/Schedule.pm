@@ -135,7 +135,7 @@ sub has_date {
 
 sub setup {
     my $self = shift;
-    my $form = $self->quickform($self->{fname}, 'Submit Changes', $self->{mode}, $self->{tid});
+    my $form = $self->quickform($self->{fname}, 'Submit Schedule Request', $self->{mode}, $self->{tid});
     $self->{form} = $form;
     my $type = $self->{type};
 

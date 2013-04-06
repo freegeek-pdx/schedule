@@ -44,19 +44,27 @@ sub parse_supply {
         }
     }
     my $str = join ' ', @astr;
+    my $destination = "";
+    if($str =~ /^([^:]+): (.+)$/) {
+	$destination = $1;
+	$str = $2;
+    }
     my $quantity = join ' ', @quant;
-    return ($str, $quantity, $by);
+    return ($str, $quantity, $by, $destination);
 }
 
 sub format_supply {
-    my ($str, $quant, $by) = @_;
+    my ($str, $quant, $by, $destination) = @_;
+    if($destination ne "") {
+	$destination = $destination . ": ";
+    }
     if($quant ne "") {
         $quant = " (" . $quant . ")";
     }
     if($by ne "") {
         $by = " by " . $by;
     }
-    return $str . $quant . $by;
+    return $destination . $str . $quant . $by;
 }
 
 # implementor API:
@@ -103,15 +111,17 @@ sub login_information {
 
 sub setup {
     my $self = shift;
-    my $form = $self->quickform($self->{fname}, 'Submit Changes', $self->{mode}, $self->{tid});
+    my $form = $self->quickform($self->{fname}, 'Submit Supply Request', $self->{mode}, $self->{tid});
     $self->{form} = $form;
     my $type = $self->{type};
 
     my $dateformat = '/^[0-9]{4}\/?(0?[1-9]|1[0-2])\/?(0?[1-9]|[1-2][0-9]|3[0-1])$/';
 
-    $form->field(name => 'name', label => 'Supply Name', type => 'text', required => 1);
+    $form->field(name => 'requestor', label => 'Requestor Name', type => 'text', required => 1);
+    $form->field(name => 'requestor_email', label => 'Requestor Email address', type => 'text', required => 1);
+    $form->field(name => 'name', label => 'Supply Name<br/>Please include brand or description if possible.', type => 'text', required => 1);
+    $form->field(name => 'destination', label => 'Where would you like this item delivered after purchase?<br />(example: Warehouse, Supply Cabinets, Front Desk)', type => 'text');
     $form->field(name => 'quantity', label => 'Quantity', type => 'text', required => 0);
-    $form->field(name => 'requestor', label => 'Requestor Name', type => 'text', required => 0);
     $form->field(name => 'date', label => 'Needed By Date (YYYY/MM/DD)', type => 'text', required => 0, validate => $dateformat);
     $form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
     $form->field(name => 'notes', type => 'textarea',  cols => '80', rows => '10');
@@ -140,23 +150,33 @@ sub parse {
 	$form->field(name => 'name', value => $parts[0]);
 	$form->field(name => 'date', value => $parts[2]);
 	$form->field(name => 'quantity', value => $parts[1]);
+	$form->field(name => 'destination', value => $parts[3]);
     }
+}
+
+sub requestor {
+    my $self = shift;
+    my $form = $self->{form};
+    my $name = $form->field('requestor');
+    my $email = $form->field('requestor_email');
+    my $req = $name . " <" . $email . ">";
+    return $req;
 }
 
 sub save {
     my $self = shift;
     my $form = $self->{form};
     my $text = $form->field('notes');
-    my $requestor = $form->field('requestor');
-    if($requestor ne '') {
-	$text = "Requested by: " . $requestor . "\n" . $text;
-    }
     my $name = $form->field('name');
     my $date = $form->field('date');
+    my $destination = $form->field('destination');
     my $quantity = $form->field('quantity');
     my $subject = "";
-    $subject = format_supply($name, $quantity, $date);
+    $subject = format_supply($name, $quantity, $date, $destination);
     $self->{subject} = $subject;
+#    if(defined($self->{tid})) {
+	$text = "Supply request modified by: " . $self->requestor() . "\n\n" . $text;
+#    }
     $self->do_save($subject, $text);
 }
 
