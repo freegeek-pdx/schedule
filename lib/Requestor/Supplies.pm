@@ -119,12 +119,12 @@ sub setup {
 
     $form->field(name => 'requestor', label => 'Requestor Name', type => 'text', required => 1);
     $form->field(name => 'requestor_email', label => 'Requestor Email address', type => 'text', required => 1);
-    $form->field(name => 'name', label => 'Supply Name<br/>Please include brand or description if possible.', type => 'text', required => 1);
-    $form->field(name => 'destination', label => 'Where would you like this item delivered after purchase?<br />(example: Warehouse, Supply Cabinets, Front Desk)', type => 'text');
+    $form->field(name => 'name', label => 'Supply Name', type => 'text', required => 1);
+    $form->field(name => 'destination', label => 'Where would you like this item delivered?<br />(example: Warehouse, Supply Cabinets)', type => 'text');
     $form->field(name => 'quantity', label => 'Quantity', type => 'text', required => 0);
     $form->field(name => 'date', label => 'Needed By Date (YYYY/MM/DD)', type => 'text', required => 0, validate => $dateformat);
     $form->field(name => 'date_chooser', type => 'button', label => '', value => 'Date Chooser');
-    $form->field(name => 'notes', type => 'textarea',  cols => '80', rows => '10');
+    $form->field(name => 'notes', label => 'Notes<br/>(Please include brand or description if possible.)', type => 'textarea',  cols => '80', rows => '10');
 
 }
 
