@@ -82,7 +82,7 @@ sub setup {
         label => 'Please summarize your request in a few words:<br />
             (i.e. Unable to print at volunteer desk, Joebob unable to send email, 
             Install solitaire on database server)',
-        type => 'text', required => 1);
+        type => 'text', required => 1, maxlength => 80);
 
     $form->field(name => 'details',
         label => 'Please explain in detail what you are trying to do, and what you expect the outcome to be:',
@@ -93,13 +93,17 @@ sub setup {
         type => 'textarea');
 
     $form->field(name => 'result',
-        label => 'What was the result you got and how is it different from the expected behavior(if applicable)?',
+        label => 'What was the result you got and how is it different from the expected behavior (if applicable)?',
         type => 'textarea');
 
     $form->field(name => 'additional_info',
         label => 'Please provide any other information that might help us investigate this issue.<br />
         (date and time this problem occurred, specific data such as email addresses, contact IDs, crash IDs, cut-and-paste the exact error message displayed, etc.)',
         type => 'textarea');
+
+    $form->field(name => 'when',
+        label => 'When do you need this implemented by? (the urgency should be explained reasonably well from what was provided above)<br />
+                  (i.e. now (1-2 hrs), today (3-6 hrs), 1-2 weeks, or a specific date)', type => 'text');
 
 }
 
@@ -125,6 +129,10 @@ sub save {
 
     my $text = $form->field('details');
 
+    my $when = $form->field('when');
+    if(length($when) > 0) {
+	$text = "Needed by: " . $when . "\n\n" . $text;
+    }
     my $steps = $form->field('steps');
     if(length($steps) > 0) {
 	$text .= "\n\nSteps to reproduce:\n" . $steps;
