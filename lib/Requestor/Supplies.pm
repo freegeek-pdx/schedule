@@ -98,15 +98,6 @@ sub has_login {
     return 0;
 }
 
-sub login_information {
-    my $info = {};
-    die "Missing file in format USER:PASS in /etc/rtconf" unless(-e "/etc/rtconf");
-    my $val = `cat /etc/rtconf`;
-    chomp $val;
-    ($info->{user}, $info->{password}) = split ':', $val;
-    return $info;
-}
-
 # save, setup, parse
 
 sub setup {

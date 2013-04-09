@@ -39,6 +39,7 @@ package Requestor::Base;
 
 use CGI::Session;
 use RT::Client::REST;
+use RT::Client::REST::FromConfig;
 use RT::Client::REST::User;
 use Error qw(:try);
 use Date::Parse;
@@ -65,14 +66,10 @@ sub has_login {
 
 sub get_login_information {
     my $self = shift;
-    if($self->has_login) {
-	my $info = {};
-	$info->{user} = $self->{session}->param('username');
-	$info->{password} = $self->{session}->param('password');
-	return $info;
-    } else {
-	return $self->login_information;
-    }
+    my $info = {};
+    $info->{user} = $self->{session}->param('username');
+    $info->{password} = $self->{session}->param('password');
+    return $info;
 }
 
 sub new {
@@ -133,15 +130,49 @@ sub user_is_allowed {
     return 1;
 }
 
-sub run {
+sub do_login {
     my $self = shift;
+    my $logout_form = shift;
+    my $masterform = shift;
+
     my $hostname = `hostname`;
     chomp $hostname;
-    my $domain =  ($hostname eq 'art') ? 'localhost' : 'todo.freegeek.org';
-    my $rt = RT::Client::REST->new(
-	server => 'http://' . $domain . '/rt',
-	timeout => 30,
-	);
+
+    my $success = 0;
+
+	    try {
+		if($self->has_login) {
+		    my $domain =  ($hostname eq 'art') ? 'localhost' : 'todo.freegeek.org';
+		    my $info = $self->get_login_information;
+		    my $user = $info->{user};
+		    my $pass = $info->{password};
+		    if(defined($masterform)) {
+			$user = $masterform->field('username');
+			$pass = $masterform->field('password');
+		    }
+		    my $rt = RT::Client::REST->new(
+			server => 'http://' . $domain . '/rt',
+			timeout => 30,
+			);
+		    $rt->login(username => $user, password => $pass);
+		    $self->{user} = $user;  # FIXME? needed?
+		    $self->{rt} = $rt;
+
+		    $logout_form->text("Logged in as " . $user);
+		} else {
+		    my $rt = RT::Client::REST::FromConfig->new( "/root/.rtrc"	);
+		    $self->{rt} = $rt;
+		}
+		$success = 1;
+	    } catch Exception::Class::Base with {
+		$logout_form->text("problem communicating with RT server: " . shift->message);
+		$success = 0;
+	    };
+    return $success;
+}
+
+sub run {
+    my $self = shift;
 
     my @fields = ('username', 'password');
     my $masterform = CGI::MyFormBuilder->new(fields => \@fields, header => 1, method   => 'post', keepextras => ['mode'], required => 'ALL', name => 'login', title => $self->title);
@@ -172,31 +203,15 @@ sub run {
 	    print $masterform->render;
 	} else {
 	    my $success;
-	    my $info = $self->get_login_information;
-	    my $user = $info->{user};
-	    my $pass = $info->{password};
 
-	    my $error;
-	    try {
-		$rt->login(username => $user, password => $pass);
-		$success = 1;
-	    } catch Exception::Class::Base with {
-		$error = "problem communicating with RT server: " . shift->message;
-		$success = 0;
-	    };
+	    my $success = $self->do_login($logout_form);
 	    if(!$success) {
-		$logout_form->text($error);
 		print $logout_form->render;
 	    }
 	    if($success) {
-		$self->{user} = $user;
 		$self->{mode} = $mode;
 		$self->{tid} = $tid;
 		$self->{logout_form} = $logout_form;
-		$self->{rt} = $rt;
-		if($self->has_login) {
-		    $logout_form->text("Logged in as " . $user);
-		}
 		$self->do_main;
 	    }
 	}
@@ -205,15 +220,8 @@ sub run {
 	my $pass = $masterform->field('password');
 	my $success;
 	my $error;
-	try {
-	    $rt->login(username => $user, password => $pass);
-	    $success = 1;
-	} catch Exception::Class::Base with {
-	    $error = "problem logging in: " . shift->message;
-	    $success = 0;
-	};
 
-	$self->{rt} = $rt;
+	$success = $self->do_login($logout_form, $masterform);
 	if($success) {
 	    $success = $self->user_is_allowed($user);
 	    if(!$success) {
