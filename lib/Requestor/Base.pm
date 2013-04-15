@@ -334,7 +334,7 @@ sub save_changes {
 	}
     } else {
 	# FIXME when no has_login
-	$self->{tid} = $self->{rt}->create(type => 'ticket', set => {priority => 0,
+	$self->{tid} = $self->{rt}->create(type => 'ticket', set => {priority => $self->priority(),
 						     requestor => [$self->requestor],
                                                      AdminCc => [$self->cc()],
 						     queue => $self->queuename,
@@ -342,6 +342,10 @@ sub save_changes {
     }
     $self->{subject} = $subject;
     return $self->{tid};
+}
+
+sub priority {
+    return 0;
 }
 
 sub requestor {

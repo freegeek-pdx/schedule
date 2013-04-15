@@ -12,6 +12,9 @@ use base 'Requestor::Base';
 #    return '<link rel="stylesheet" href="/cgi-bin/static/techno.css"></link>';
 #}
 
+sub priority {
+    return 50;
+}
 
 sub transform {
     my $self = shift;
@@ -79,10 +82,10 @@ sub setup {
         type => 'text');
 
     $form->field(name => 'summary',
-        label => 'Please summarize your request in a few words:<br />
+        label => 'Please summarize your request in a few words (70 characters):<br />
             (i.e. Unable to print at volunteer desk, Joebob unable to send email, 
             Install solitaire on database server)',
-        type => 'text', required => 1, maxlength => 80);
+        type => 'text', required => 1, maxlength => 70);
 
     $form->field(name => 'details',
         label => 'Please explain in detail what you are trying to do, and what you expect the outcome to be:',
@@ -121,14 +124,16 @@ sub save {
     my $form = $self->{form};
 
     my $subject = $form->field('summary');
-    my @extras = ($form->field('infrastructure'), $form->field('area'));
-    my $extra = join ", ", grep {$_ && length($_) > 0} @extras;
-    if(length($extra) > 0) {
-	$subject = $extra . ": " . $subject;
-    }
-
     my $text = $form->field('details');
 
+    my $infra = $form->field('infrastructure');
+    if(length($infra) > 0) {
+	$text = "Infrastructure: " . $infra . "\n\n" . $text;
+    }
+    my $area = $form->field('area');
+    if(length($area) > 0) {
+	$text = "Area: " . $area . "\n\n" . $text;
+    }
     my $when = $form->field('when');
     if(length($when) > 0) {
 	$text = "Needed by: " . $when . "\n\n" . $text;
