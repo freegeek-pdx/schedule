@@ -61,6 +61,7 @@ sub has_login {
 sub setup {
     my $self = shift;
     my $form = $self->quickform($self->{fname}, 'Submit Technocrats Request', $self->{mode}, $self->{tid});
+    $form->text("<b>Please do NOT provide passwords or other private information</b> through this interface as your request is sent to us using email.<br />That information can be provided to us in person after creating the ticket, if necessary.");
     $self->{form} = $form;
     my $type = $self->{type};
 
