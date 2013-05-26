@@ -151,7 +151,7 @@ sub do_login {
 			$pass = $masterform->field('password');
 		    }
 		    my $rt = RT::Client::REST->new(
-			server => 'http://' . $domain . '/rt',
+			server => 'http://' . $domain,
 			timeout => 30,
 			);
 		    $rt->login(username => $user, password => $pass);
